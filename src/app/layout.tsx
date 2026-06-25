@@ -14,6 +14,15 @@ export const metadata: Metadata = {
   title: "繋叶 Hitoha",
   description: "繋叶 Hitoha — 案件管理・KPI",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Hitoha",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({

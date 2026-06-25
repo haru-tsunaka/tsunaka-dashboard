@@ -1,0 +1,8 @@
+{
+  "name": "繋叶 Hitoha",
+  "short_name": "Hitoha",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fa",
+  "theme_color": "#0c4065"
+}

@@ -15,10 +15,16 @@
   --font-sans: "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 }
 
+html {
+  background: var(--color-brand-bg);
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--color-brand-bg);
   color: var(--color-brand-text);
   font-family: var(--font-sans);
+  overscroll-behavior: none;
 }
 
 .form-input {
