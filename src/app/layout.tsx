@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description: "繋叶 Hitoha — 案件管理・KPI",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
