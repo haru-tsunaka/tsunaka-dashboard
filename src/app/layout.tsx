@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Serif_JP } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import InactivityGuard from "@/components/InactivityGuard";
 
 const notoSerifJP = Noto_Serif_JP({
   variable: "--font-noto-serif-jp",
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="ja" className={`${notoSerifJP.variable} h-full`}>
       <body className="min-h-full flex flex-col">
         <Header />
+        <InactivityGuard />
         <main className="flex-1">{children}</main>
       </body>
     </html>
