@@ -1,65 +1,97 @@
-import Image from "next/image";
+import { createClient } from '@/lib/supabase/server';
+import type { Case, CaseStatus } from '@/lib/types';
+import { CASE_STATUSES } from '@/lib/constants';
+import CaseCard from '@/components/CaseCard';
+import Link from 'next/link';
 
-export default function Home() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status: filterStatus } = await searchParams;
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('cases')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (filterStatus && CASE_STATUSES.includes(filterStatus as CaseStatus)) {
+    query = query.eq('status', filterStatus);
+  }
+
+  const { data: cases } = await query;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-2">
+        <FilterTab label="全て" value="" current={filterStatus} />
+        {CASE_STATUSES.map((s) => (
+          <FilterTab key={s} label={s} value={s} current={filterStatus} />
+        ))}
+      </div>
+
+      {/* Case grid */}
+      {cases && cases.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cases.map((c: Case) => (
+            <CaseCard key={c.id} c={c} />
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-brand-muted text-sm mb-6">まだ案件がありません</p>
+          <Link
+            href="/cases/new"
+            className="inline-block px-8 py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            最初の案件を追加する
+          </Link>
         </div>
-      </main>
+      )}
+
+      {/* FAB - mobile */}
+      <Link
+        href="/cases/new"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gold text-navy flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity text-2xl font-bold md:hidden"
+      >
+        +
+      </Link>
+      {/* FAB - desktop */}
+      <div className="hidden md:block fixed bottom-8 right-8">
+        <Link
+          href="/cases/new"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide shadow-lg hover:opacity-90 transition-opacity"
+        >
+          + 新規案件
+        </Link>
+      </div>
     </div>
+  );
+}
+
+function FilterTab({
+  label,
+  value,
+  current,
+}: {
+  label: string;
+  value: string;
+  current?: string;
+}) {
+  const isActive = (current || '') === value;
+  return (
+    <Link
+      href={value ? `/?status=${value}` : '/'}
+      className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm transition-colors ${
+        isActive
+          ? 'bg-navy text-white'
+          : 'text-brand-muted hover:bg-navy/5'
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
