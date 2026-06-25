@@ -85,7 +85,7 @@ export default async function CaseDetailPage({
           <StatusBadge status={c.status} />
           <Link
             href={`/cases/${c.id}/edit`}
-            className="px-5 py-2 rounded-full border-2 border-gold text-navy text-xs font-bold tracking-wide hover:bg-gold transition-colors"
+            className="px-5 py-2 rounded-lg border border-brand-border text-brand-muted text-xs font-medium hover:border-navy hover:text-navy transition-colors"
           >
             編集
           </Link>
@@ -95,7 +95,7 @@ export default async function CaseDetailPage({
       {/* Info sections */}
       <div className="space-y-8">
         {/* Client */}
-        <InfoSection label="CLIENT">
+        <InfoSection label="クライアント">
           <InfoGrid>
             <InfoItem label="カテゴリ" value={c.category} />
             <InfoItem label="連絡手段" value={c.contact_method || '未設定'} />
@@ -107,7 +107,7 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* Schedule */}
-        <InfoSection label="SCHEDULE">
+        <InfoSection label="スケジュール">
           <InfoGrid>
             <InfoItem label="イベント・撮影日" value={formatDate(c.event_date)} />
             <InfoItem label="納期" value={formatDate(c.deadline)} />
@@ -115,7 +115,7 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* Budget */}
-        <InfoSection label="BUDGET" bg>
+        <InfoSection label="予算" bg>
           <InfoGrid>
             <InfoItem label="見積金額" value={formatYen(c.quoted_amount)} />
             <InfoItem label="経費" value={formatYen(c.expenses)} />
@@ -135,7 +135,7 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* Next Action */}
-        <InfoSection label="NEXT ACTION">
+        <InfoSection label="次のアクション">
           <div className={isOverdue ? 'text-red-600' : ''}>
             <p className="text-sm whitespace-pre-wrap">{c.next_action || '未設定'}</p>
             {c.next_action_by && (
@@ -145,12 +145,12 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* Deliverables */}
-        <InfoSection label="DELIVERABLES" bg>
+        <InfoSection label="納品物" bg>
           <p className="text-sm whitespace-pre-wrap">{c.deliverables || '未設定'}</p>
         </InfoSection>
 
         {/* Progress Log */}
-        <InfoSection label="PROGRESS LOG">
+        <InfoSection label="進捗ログ">
           <ProgressLogSection logs={(logs || []) as ProgressLog[]} addLogAction={addLog} />
         </InfoSection>
       </div>

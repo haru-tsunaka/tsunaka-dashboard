@@ -18,14 +18,14 @@ export const CATEGORIES = [
 
 export const STATUS_COLORS: Record<CaseStatus, { bg: string; text: string }> = {
   '商談中': { bg: 'bg-navy/10', text: 'text-navy' },
-  '準備中': { bg: 'bg-blue-100', text: 'text-blue-700' },
-  '進行中': { bg: 'bg-gold/20', text: 'text-gold-dark' },
-  '納品済み': { bg: 'bg-green-100', text: 'text-green-700' },
-  '完了': { bg: 'bg-gray-100', text: 'text-gray-500' },
+  '準備中': { bg: 'bg-navy/5', text: 'text-navy/70' },
+  '進行中': { bg: 'bg-navy/15', text: 'text-navy' },
+  '納品済み': { bg: 'bg-green-50', text: 'text-green-700' },
+  '完了': { bg: 'bg-gray-100', text: 'text-brand-muted' },
 };
 
 export const PAYMENT_COLORS: Record<PaymentStatus, string> = {
-  '未入金': 'bg-red-400',
-  '一部入金': 'bg-yellow-400',
-  '入金済み': 'bg-green-400',
+  '未入金': 'bg-red-300',
+  '一部入金': 'bg-amber-300',
+  '入金済み': 'bg-green-300',
 };

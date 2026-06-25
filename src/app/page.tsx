@@ -45,7 +45,7 @@ export default async function DashboardPage({
           <p className="text-brand-muted text-sm mb-6">まだ案件がありません</p>
           <Link
             href="/cases/new"
-            className="inline-block px-8 py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
+            className="inline-block px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
           >
             最初の案件を追加する
           </Link>
@@ -55,7 +55,7 @@ export default async function DashboardPage({
       {/* FAB - mobile */}
       <Link
         href="/cases/new"
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gold text-navy flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity text-2xl font-bold md:hidden"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg hover:bg-navy-light transition-colors text-2xl md:hidden"
       >
         +
       </Link>
@@ -63,7 +63,7 @@ export default async function DashboardPage({
       <div className="hidden md:block fixed bottom-8 right-8">
         <Link
           href="/cases/new"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide shadow-lg hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium text-sm tracking-wide shadow-lg hover:bg-navy-light transition-colors"
         >
           + 新規案件
         </Link>

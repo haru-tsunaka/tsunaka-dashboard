@@ -28,7 +28,7 @@ export default function ProgressLogSection({
         <div className="flex justify-end mt-2">
           <button
             type="submit"
-            className="px-5 py-2 rounded-full bg-gold text-navy text-xs font-bold tracking-wide hover:opacity-90 transition-opacity"
+            className="px-5 py-2 rounded-lg bg-navy text-white text-xs font-medium tracking-wide hover:bg-navy-light transition-colors"
           >
             追加
           </button>

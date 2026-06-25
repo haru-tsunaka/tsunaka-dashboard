@@ -33,7 +33,7 @@ export default function CaseCard({ c }: { c: Case }) {
 
         {c.next_action && (
           <div className={`text-sm mb-3 ${isOverdue ? 'text-red-600' : 'text-brand-text'}`}>
-            <span className="text-brand-muted text-xs">NEXT: </span>
+            <span className="text-brand-muted text-xs">次: </span>
             <span className="line-clamp-1">{c.next_action}</span>
           </div>
         )}

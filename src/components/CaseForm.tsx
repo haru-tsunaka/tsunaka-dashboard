@@ -39,7 +39,7 @@ export default function CaseForm({
   return (
     <form action={action} className="space-y-8">
       {/* 基本情報 */}
-      <Section label="BASIC INFO">
+      <Section label="基本情報">
         <Field label="案件名" required>
           <input name="name" defaultValue={data.name} required
             className="form-input" />
@@ -62,7 +62,7 @@ export default function CaseForm({
       </Section>
 
       {/* ステータス */}
-      <Section label="STATUS">
+      <Section label="ステータス">
         <div className="grid grid-cols-2 gap-4">
           <Field label="ステータス">
             <select name="status" defaultValue={data.status} className="form-input">
@@ -82,7 +82,7 @@ export default function CaseForm({
       </Section>
 
       {/* スケジュール */}
-      <Section label="SCHEDULE">
+      <Section label="スケジュール">
         <div className="grid grid-cols-2 gap-4">
           <Field label="イベント・撮影日">
             <input type="date" name="event_date" defaultValue={data.event_date || ''}
@@ -96,7 +96,7 @@ export default function CaseForm({
       </Section>
 
       {/* 予算 */}
-      <Section label="BUDGET">
+      <Section label="予算">
         <div className="grid grid-cols-2 gap-4">
           <Field label="見積金額（円）">
             <input type="number" name="quoted_amount" defaultValue={data.quoted_amount ?? ''}
@@ -110,7 +110,7 @@ export default function CaseForm({
       </Section>
 
       {/* 次のアクション */}
-      <Section label="NEXT ACTION">
+      <Section label="次のアクション">
         <Field label="次にやること">
           <textarea name="next_action" defaultValue={data.next_action || ''} rows={2}
             className="form-input" />
@@ -122,7 +122,7 @@ export default function CaseForm({
       </Section>
 
       {/* 連絡先 */}
-      <Section label="CONTACT">
+      <Section label="連絡先">
         <div className="grid grid-cols-2 gap-4">
           <Field label="連絡手段">
             <select name="contact_method" defaultValue={data.contact_method || ''} className="form-input">
@@ -140,7 +140,7 @@ export default function CaseForm({
       </Section>
 
       {/* 納品物 */}
-      <Section label="DELIVERABLES">
+      <Section label="納品物">
         <Field label="納品物">
           <textarea name="deliverables" defaultValue={data.deliverables || ''} rows={3}
             className="form-input" placeholder="例: 公式PV（2〜3分）、レタッチ済み写真20枚" />
@@ -151,7 +151,7 @@ export default function CaseForm({
       <div className="flex items-center gap-3 pt-4">
         <button
           type="submit"
-          className="px-8 py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
+          className="px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
         >
           保存
         </button>

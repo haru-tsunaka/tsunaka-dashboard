@@ -39,23 +39,23 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="bg-white rounded-xl p-8 shadow-sm border border-brand-border">
           <div className="mb-5">
-            <label className="block text-xs text-brand-muted mb-1.5 tracking-wide">EMAIL</label>
+            <label className="block text-xs text-brand-muted mb-1.5 tracking-wide">メールアドレス</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-brand-border text-sm focus:outline-none focus:border-gold transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg border border-brand-border text-sm focus:outline-none focus:border-navy transition-colors"
               required
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-xs text-brand-muted mb-1.5 tracking-wide">PASSWORD</label>
+            <label className="block text-xs text-brand-muted mb-1.5 tracking-wide">パスワード</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-brand-border text-sm focus:outline-none focus:border-gold transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg border border-brand-border text-sm focus:outline-none focus:border-navy transition-colors"
               required
             />
           </div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-full bg-gold text-navy font-bold text-sm tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors disabled:opacity-50"
           >
             {loading ? 'ログイン中...' : 'ログイン'}
           </button>
