@@ -25,6 +25,8 @@ export default function LoginPage() {
       return;
     }
 
+    // InactivityGuardが即ログアウトしないよう、最終操作時間をリセット
+    localStorage.setItem('hitoha_last_activity', Date.now().toString());
     router.push('/');
     router.refresh();
   };
