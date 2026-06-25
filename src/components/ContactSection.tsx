@@ -24,6 +24,9 @@ export default function ContactSection({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">{contact.name}</span>
+                  {contact.name_reading && (
+                    <span className="text-xs text-brand-muted">({contact.name_reading})</span>
+                  )}
                   {contact.role && (
                     <span className="text-xs text-brand-muted">{contact.role}</span>
                   )}
@@ -35,6 +38,9 @@ export default function ContactSection({
                   <p className="text-xs text-brand-muted">
                     {contact.contact_method}: {contact.contact_info}
                   </p>
+                )}
+                {contact.memo && (
+                  <p className="text-xs text-brand-muted mt-2 whitespace-pre-wrap border-t border-brand-border pt-2">{contact.memo}</p>
                 )}
               </div>
               <form action={deleteContactAction}>
@@ -65,13 +71,19 @@ export default function ContactSection({
               <input name="contact_name" required className="form-input" placeholder="山田太郎" />
             </div>
             <div>
+              <label className="block text-xs text-brand-muted mb-1">読み</label>
+              <input name="contact_name_reading" className="form-input" placeholder="やまだたろう" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
               <label className="block text-xs text-brand-muted mb-1">役職</label>
               <input name="contact_role" className="form-input" placeholder="代表 / 担当者" />
             </div>
-          </div>
-          <div>
-            <label className="block text-xs text-brand-muted mb-1">部門・組織名</label>
-            <input name="contact_department" className="form-input" placeholder="実行委員会 / 広報部" />
+            <div>
+              <label className="block text-xs text-brand-muted mb-1">部門・組織名</label>
+              <input name="contact_department" className="form-input" placeholder="実行委員会 / 広報部" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -88,6 +100,10 @@ export default function ContactSection({
               <label className="block text-xs text-brand-muted mb-1">連絡先</label>
               <input name="contact_info" className="form-input" placeholder="メアド / ID" />
             </div>
+          </div>
+          <div>
+            <label className="block text-xs text-brand-muted mb-1">メモ</label>
+            <textarea name="contact_memo" rows={2} className="form-input" placeholder="自由にメモ" />
           </div>
           <div className="flex items-center gap-2 pt-1">
             <button

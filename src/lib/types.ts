@@ -28,10 +28,12 @@ export interface CaseContact {
   id: string;
   case_id: string;
   name: string;
+  name_reading: string | null;
   department: string | null;
   role: string | null;
   contact_method: string | null;
   contact_info: string | null;
+  memo: string | null;
   created_at: string;
   user_id: string;
 }

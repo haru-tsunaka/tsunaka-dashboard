@@ -76,10 +76,12 @@ export default async function CaseDetailPage({
     await supabase.from('case_contacts').insert({
       case_id: id,
       name: (formData.get('contact_name') as string).trim(),
+      name_reading: (formData.get('contact_name_reading') as string) || null,
       department: (formData.get('contact_department') as string) || null,
       role: (formData.get('contact_role') as string) || null,
       contact_method: (formData.get('contact_method') as string) || null,
       contact_info: (formData.get('contact_info') as string) || null,
+      memo: (formData.get('contact_memo') as string) || null,
       user_id: user.id,
     });
 
