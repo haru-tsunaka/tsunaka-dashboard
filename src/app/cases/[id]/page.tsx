@@ -19,9 +19,10 @@ function formatDate(date: string | null) {
 function formatDateTime(date: string | null) {
   if (!date) return '未定';
   const d = new Date(date);
-  const dateStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-  const h = d.getHours();
-  const m = d.getMinutes();
+  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const dateStr = `${jst.getUTCFullYear()}/${jst.getUTCMonth() + 1}/${jst.getUTCDate()}`;
+  const h = jst.getUTCHours();
+  const m = jst.getUTCMinutes();
   if (h === 0 && m === 0) return dateStr;
   return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
 }
