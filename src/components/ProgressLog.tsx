@@ -39,15 +39,20 @@ export default function ProgressLogSection({
       {/* Timeline */}
       {logs.length > 0 ? (
         <div className="relative pl-6">
-          <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gold/30" />
           <div className="space-y-6">
-            {logs.map((log) => (
-              <div key={log.id} className="relative">
-                <div className="absolute left-[-20px] top-1.5 w-3 h-3 rounded-full border-2 border-gold bg-white" />
-                <p className="text-xs text-brand-muted mb-1">{formatDateTime(log.created_at)}</p>
-                <p className="text-sm whitespace-pre-wrap">{log.content}</p>
-              </div>
-            ))}
+            {logs.map((log, index) => {
+              const content = log.content.replace(/[\u2705\u2611\uFE0F]\s?/g, '');
+              return (
+                <div key={log.id} className="relative">
+                  <div className="absolute left-[-20px] top-1.5 w-3 h-3 rounded-full border-2 border-gold bg-white z-10" />
+                  {index < logs.length - 1 && (
+                    <div className="absolute left-[-15px] top-[12px] w-px bg-gold/30" style={{ bottom: '-36px' }} />
+                  )}
+                  <p className="text-xs text-brand-muted mb-1">{formatDateTime(log.created_at)}</p>
+                  <p className="text-sm whitespace-pre-wrap">{content}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : (

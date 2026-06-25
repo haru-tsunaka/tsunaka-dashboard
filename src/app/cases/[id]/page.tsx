@@ -152,7 +152,7 @@ export default async function CaseDetailPage({
 
     if (current?.next_action) {
       // 進捗ログに記録
-      let logContent = `✅ ${current.next_action}`;
+      let logContent = `${current.next_action}`;
       if (current.next_action_memo) {
         logContent += `\n${current.next_action_memo}`;
       }
