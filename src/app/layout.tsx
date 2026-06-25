@@ -11,8 +11,8 @@ const notoSerifJP = Noto_Serif_JP({
 });
 
 export const metadata: Metadata = {
-  title: "繋叶 Dashboard",
-  description: "繋叶 案件管理ダッシュボード",
+  title: "繋叶 Hitoha",
+  description: "繋叶 Hitoha — 案件管理・KPI",
 };
 
 export default function RootLayout({

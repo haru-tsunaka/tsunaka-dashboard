@@ -40,7 +40,7 @@ export default function Header() {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <span className="font-serif text-white text-lg font-bold tracking-wider">繋叶</span>
-            <span className="text-white/70 text-sm tracking-wide ml-1">案件管理</span>
+            <span className="text-white/70 text-sm tracking-wide ml-1">Hitoha</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link
