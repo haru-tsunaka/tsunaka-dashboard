@@ -30,7 +30,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-brand-bg">
+    <div className="min-h-screen flex items-start justify-center px-4 pt-20 bg-brand-bg">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <h1 className="font-serif text-navy text-3xl font-bold tracking-wider mb-3">Hitoha</h1>
