@@ -45,6 +45,7 @@ export interface ProgressLog {
   id: string;
   case_id: string;
   created_at: string;
+  title: string | null;
   content: string;
   user_id: string;
 }

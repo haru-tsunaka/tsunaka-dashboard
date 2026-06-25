@@ -68,12 +68,14 @@ export default async function CaseDetailPage({
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
 
+    const title = formData.get('title') as string;
     const content = formData.get('content') as string;
-    if (!content.trim()) return;
+    if (!title?.trim() && !content?.trim()) return;
 
     await supabase.from('progress_logs').insert({
       case_id: id,
-      content: content.trim(),
+      title: title?.trim() || null,
+      content: content?.trim() || '',
       user_id: user.id,
     });
 
@@ -152,13 +154,10 @@ export default async function CaseDetailPage({
 
     if (current?.next_action) {
       // 進捗ログに記録
-      let logContent = `${current.next_action}`;
-      if (current.next_action_memo) {
-        logContent += `\n${current.next_action_memo}`;
-      }
       await supabase.from('progress_logs').insert({
         case_id: id,
-        content: logContent,
+        title: current.next_action,
+        content: current.next_action_memo || '',
         user_id: user.id,
       });
 
