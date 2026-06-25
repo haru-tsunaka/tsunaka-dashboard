@@ -23,8 +23,8 @@ export default function Header() {
         .single();
       if (profile?.role === 'owner') setIsOwner(true);
     };
-    checkRole();
-  }, []);
+    if (pathname !== '/login') checkRole();
+  }, [pathname]);
 
   if (pathname === '/login') return null;
 
