@@ -22,7 +22,14 @@ export default async function DashboardPage({
   }
 
   const { data: cases } = await query;
-  const allCases = (cases || []) as Case[];
+  const allCases = ((cases || []) as Case[]).sort((a, b) => {
+    const aDate = a.next_action_by;
+    const bDate = b.next_action_by;
+    if (!aDate && !bDate) return 0;
+    if (!aDate) return 1;
+    if (!bDate) return -1;
+    return new Date(aDate).getTime() - new Date(bDate).getTime();
+  });
   const activeCases = allCases.filter((c) => c.status !== '完了');
   const completedCases = allCases.filter((c) => c.status === '完了');
   const showSplit = !filterStatus || filterStatus === '';
