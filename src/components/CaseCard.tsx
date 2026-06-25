@@ -48,7 +48,9 @@ export default function CaseCard({ c }: { c: Case }) {
       <div className={`rounded-lg border p-5 transition-shadow ${
         isCompleted
           ? 'bg-gray-200 border-gray-300'
-          : 'bg-white border-brand-border hover:shadow-md'
+          : isOverdue
+            ? 'bg-red-50 border-red-300 hover:shadow-md'
+            : 'bg-white border-brand-border hover:shadow-md'
       }`}>
         <div className="flex items-start justify-between mb-3">
           <div className="min-w-0 flex-1">
