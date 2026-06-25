@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, CaseContact, ProgressLog } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
@@ -7,6 +8,7 @@ import ContactSection from '@/components/ContactSection';
 import Link from 'next/link';
 import { PAYMENT_COLORS } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
+import NextActionEditor from '@/components/NextActionEditor';
 
 function formatDate(date: string | null) {
   if (!date) return '未定';
@@ -74,7 +76,7 @@ export default async function CaseDetailPage({
       user_id: user.id,
     });
 
-    redirect(`/cases/${id}`);
+    revalidatePath(`/cases/${id}`);
   }
 
   async function addContact(formData: FormData) {
@@ -95,7 +97,23 @@ export default async function CaseDetailPage({
       user_id: user.id,
     });
 
-    redirect(`/cases/${id}`);
+    revalidatePath(`/cases/${id}`);
+  }
+
+  async function updateContact(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const contactId = formData.get('contact_id') as string;
+    await supabase.from('case_contacts').update({
+      name: (formData.get('contact_name') as string).trim(),
+      name_reading: (formData.get('contact_name_reading') as string) || null,
+      department: (formData.get('contact_department') as string) || null,
+      role: (formData.get('contact_role') as string) || null,
+      contact_method: (formData.get('contact_method') as string) || null,
+      contact_info: (formData.get('contact_info') as string) || null,
+      memo: (formData.get('contact_memo') as string) || null,
+    }).eq('id', contactId);
+    revalidatePath(`/cases/${id}`);
   }
 
   async function deleteContact(formData: FormData) {
@@ -103,13 +121,26 @@ export default async function CaseDetailPage({
     const supabase = await createClient();
     const contactId = formData.get('contact_id') as string;
     await supabase.from('case_contacts').delete().eq('id', contactId);
-    redirect(`/cases/${id}`);
+    revalidatePath(`/cases/${id}`);
+  }
+
+  async function updateNextAction(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    await supabase.from('cases').update({
+      next_action: (formData.get('next_action') as string) || null,
+      next_action_by: (formData.get('next_action_by') as string) || null,
+      next_action_memo: (formData.get('next_action_memo') as string) || null,
+    }).eq('id', id);
+    revalidatePath(`/cases/${id}`);
+    revalidatePath('/');
   }
 
   async function deleteCase() {
     'use server';
     const supabase = await createClient();
     await supabase.from('cases').delete().eq('id', id);
+    revalidatePath('/');
     redirect('/');
   }
 
@@ -155,6 +186,7 @@ export default async function CaseDetailPage({
           <ContactSection
             contacts={(contacts || []) as CaseContact[]}
             addContactAction={addContact}
+            updateContactAction={updateContact}
             deleteContactAction={deleteContact}
           />
         </InfoSection>
@@ -191,12 +223,13 @@ export default async function CaseDetailPage({
 
         {/* Next Action */}
         <InfoSection label="次のアクション">
-          <div className={isOverdue ? 'text-red-600' : ''}>
-            <p className="text-sm whitespace-pre-wrap">{c.next_action || '未設定'}</p>
-            {c.next_action_by && (
-              <p className="text-xs text-brand-muted mt-2">期限: {formatDateTime(c.next_action_by)}</p>
-            )}
-          </div>
+          <NextActionEditor
+            nextAction={c.next_action}
+            nextActionBy={c.next_action_by}
+            nextActionMemo={c.next_action_memo}
+            isOverdue={!!isOverdue}
+            action={updateNextAction}
+          />
         </InfoSection>
 
         {/* Deliverables */}
@@ -210,10 +243,6 @@ export default async function CaseDetailPage({
         </InfoSection>
       </div>
 
-      {/* Delete */}
-      <div className="mt-16 pt-8 border-t border-brand-border">
-        <DeleteCaseButton deleteAction={deleteCase} />
-      </div>
     </div>
   );
 }

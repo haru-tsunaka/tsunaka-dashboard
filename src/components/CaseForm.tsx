@@ -32,6 +32,7 @@ const defaultData: CaseFormData = {
   expenses: 0,
   next_action: '',
   next_action_by: null,
+  next_action_memo: null,
   payment_amount: null,
   payment_date: null,
   contact_method: '',

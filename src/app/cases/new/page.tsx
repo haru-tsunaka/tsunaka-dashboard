@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import CaseForm from '@/components/CaseForm';
 import Link from 'next/link';
@@ -31,7 +32,10 @@ export default function NewCasePage() {
       user_id: user.id,
     });
 
-    if (!error) redirect('/');
+    if (!error) {
+      revalidatePath('/');
+      redirect('/');
+    }
   }
 
   return (

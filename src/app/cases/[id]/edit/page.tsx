@@ -1,7 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { Case } from '@/lib/types';
 import CaseForm from '@/components/CaseForm';
+import DeleteCaseButton from '@/components/DeleteCaseButton';
 import Link from 'next/link';
 
 export default async function EditCasePage({
@@ -47,7 +49,19 @@ export default async function EditCasePage({
       })
       .eq('id', id);
 
-    if (!error) redirect(`/cases/${id}`);
+    if (!error) {
+      revalidatePath(`/cases/${id}`);
+      revalidatePath('/');
+      redirect(`/cases/${id}`);
+    }
+  }
+
+  async function deleteCase() {
+    'use server';
+    const supabase = await createClient();
+    await supabase.from('cases').delete().eq('id', id);
+    revalidatePath('/');
+    redirect('/');
   }
 
   return (
@@ -57,6 +71,10 @@ export default async function EditCasePage({
       </Link>
       <h1 className="font-serif text-navy text-2xl font-bold mb-8">案件を編集</h1>
       <CaseForm initialData={caseData as Case} action={updateCase} />
+
+      <div className="mt-16 pt-8 border-t border-brand-border">
+        <DeleteCaseButton deleteAction={deleteCase} />
+      </div>
     </div>
   );
 }

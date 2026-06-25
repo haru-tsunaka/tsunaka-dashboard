@@ -18,6 +18,7 @@ export interface Case {
   expenses: number;
   next_action: string | null;
   next_action_by: string | null;
+  next_action_memo: string | null;
   contact_method: string | null;
   contact_info: string | null;
   payment_amount: number | null;
