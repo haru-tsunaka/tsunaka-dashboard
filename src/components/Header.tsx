@@ -21,8 +21,8 @@ export default function Header() {
     <header className="bg-navy sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-serif text-gold text-lg font-bold tracking-wider">繋叶</span>
-          <span className="text-white/40 text-xs tracking-widest">案件管理</span>
+          <span className="font-serif text-white text-lg font-bold tracking-wider">繋叶</span>
+          <span className="text-white/70 text-sm tracking-wide ml-1">案件管理</span>
         </Link>
         <button
           onClick={handleLogout}
