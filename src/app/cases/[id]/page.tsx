@@ -1,15 +1,16 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Case, ProgressLog } from '@/lib/types';
+import type { Case, CaseContact, ProgressLog } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
 import ProgressLogSection from '@/components/ProgressLog';
+import ContactSection from '@/components/ContactSection';
 import Link from 'next/link';
 import { PAYMENT_COLORS } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
 
 function formatDate(date: string | null) {
   if (!date) return '未定';
-  const d = new Date(date);
+  const d = new Date(date + 'T00:00:00');
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
@@ -42,6 +43,12 @@ export default async function CaseDetailPage({
     .eq('case_id', id)
     .order('created_at', { ascending: false });
 
+  const { data: contacts } = await supabase
+    .from('case_contacts')
+    .select('*')
+    .eq('case_id', id)
+    .order('created_at', { ascending: true });
+
   async function addLog(formData: FormData) {
     'use server';
     const supabase = await createClient();
@@ -57,6 +64,33 @@ export default async function CaseDetailPage({
       user_id: user.id,
     });
 
+    redirect(`/cases/${id}`);
+  }
+
+  async function addContact(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    await supabase.from('case_contacts').insert({
+      case_id: id,
+      name: (formData.get('contact_name') as string).trim(),
+      department: (formData.get('contact_department') as string) || null,
+      role: (formData.get('contact_role') as string) || null,
+      contact_method: (formData.get('contact_method') as string) || null,
+      contact_info: (formData.get('contact_info') as string) || null,
+      user_id: user.id,
+    });
+
+    redirect(`/cases/${id}`);
+  }
+
+  async function deleteContact(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const contactId = formData.get('contact_id') as string;
+    await supabase.from('case_contacts').delete().eq('id', contactId);
     redirect(`/cases/${id}`);
   }
 
@@ -98,12 +132,19 @@ export default async function CaseDetailPage({
         <InfoSection label="クライアント">
           <InfoGrid>
             <InfoItem label="カテゴリ" value={c.category} />
-            <InfoItem label="連絡手段" value={c.contact_method || '未設定'} />
-            <InfoItem label="連絡先" value={c.contact_info || '未設定'} />
           </InfoGrid>
           {c.description && (
             <p className="text-sm text-brand-text mt-4 whitespace-pre-wrap">{c.description}</p>
           )}
+        </InfoSection>
+
+        {/* Contacts */}
+        <InfoSection label="担当者" bg>
+          <ContactSection
+            contacts={(contacts || []) as CaseContact[]}
+            addContactAction={addContact}
+            deleteContactAction={deleteContact}
+          />
         </InfoSection>
 
         {/* Schedule */}

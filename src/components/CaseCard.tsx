@@ -6,7 +6,17 @@ import { PAYMENT_COLORS } from '@/lib/constants';
 function formatDate(date: string | null) {
   if (!date) return null;
   const d = new Date(date);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function formatDateShort(date: string | null) {
+  if (!date) return null;
+  const d = new Date(date + 'T00:00:00');
+  const now = new Date();
+  if (d.getFullYear() === now.getFullYear()) {
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 function formatYen(amount: number | null) {

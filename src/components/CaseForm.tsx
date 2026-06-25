@@ -121,24 +121,6 @@ export default function CaseForm({
         </Field>
       </Section>
 
-      {/* 連絡先 */}
-      <Section label="連絡先">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="連絡手段">
-            <select name="contact_method" defaultValue={data.contact_method || ''} className="form-input">
-              <option value="">未設定</option>
-              <option value="email">Email</option>
-              <option value="DM">Instagram DM</option>
-              <option value="LINE">LINE</option>
-            </select>
-          </Field>
-          <Field label="連絡先">
-            <input name="contact_info" defaultValue={data.contact_info || ''}
-              className="form-input" />
-          </Field>
-        </div>
-      </Section>
-
       {/* 納品物 */}
       <Section label="納品物">
         <Field label="納品物">

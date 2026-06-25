@@ -7,6 +7,7 @@ function formatDateTime(date: string) {
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+
 export default function ProgressLogSection({
   logs,
   addLogAction,

@@ -24,6 +24,18 @@ export interface Case {
   user_id: string;
 }
 
+export interface CaseContact {
+  id: string;
+  case_id: string;
+  name: string;
+  department: string | null;
+  role: string | null;
+  contact_method: string | null;
+  contact_info: string | null;
+  created_at: string;
+  user_id: string;
+}
+
 export interface ProgressLog {
   id: string;
   case_id: string;
