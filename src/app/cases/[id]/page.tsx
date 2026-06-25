@@ -129,7 +129,7 @@ export default async function CaseDetailPage({
     const supabase = await createClient();
     await supabase.from('cases').update({
       next_action: (formData.get('next_action') as string) || null,
-      next_action_by: (formData.get('next_action_by') as string) || null,
+      next_action_by: formData.get('next_action_by') ? `${formData.get('next_action_by')}:00+09:00` : null,
       next_action_memo: (formData.get('next_action_memo') as string) || null,
     }).eq('id', id);
     revalidatePath(`/cases/${id}`);
