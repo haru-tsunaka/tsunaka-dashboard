@@ -129,9 +129,9 @@ export default function NextActionEditor({
             setCompleting(false);
           }}
           disabled={completing}
-          className="px-5 py-2.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 transition-colors active:scale-[0.98] disabled:opacity-50"
+          className="px-5 py-2.5 rounded-lg bg-gold/15 text-gold-dark text-xs font-medium hover:bg-gold/25 transition-colors active:scale-[0.98] disabled:opacity-50 border border-gold/30"
         >
-          {completing ? '完了処理中...' : '完了'}
+          {completing ? '記録中...' : '達成'}
         </button>
         <button
           onClick={() => setEditing(true)}
