@@ -28,9 +28,9 @@ export default async function DashboardPage({
   const showSplit = !filterStatus || filterStatus === '';
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
       {/* Filter tabs */}
-      <div className="flex items-center gap-0.5 mb-8 overflow-x-auto pb-2 border-b border-brand-border">
+      <div className="flex items-center gap-0.5 mb-6 md:mb-8 overflow-x-auto pb-2 border-b border-brand-border scrollbar-hide -mx-4 px-4">
         <FilterTab label="全て" value="" current={filterStatus} />
         {CASE_STATUSES.map((s) => (
           <FilterTab key={s} label={s} value={s} current={filterStatus} />
@@ -77,7 +77,7 @@ export default async function DashboardPage({
       {/* FAB - mobile */}
       <Link
         href="/cases/new"
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg hover:bg-navy-light transition-colors text-2xl md:hidden"
+        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-5 w-14 h-14 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg hover:bg-navy-light transition-colors text-2xl md:hidden active:scale-95"
       >
         +
       </Link>

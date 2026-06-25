@@ -74,17 +74,17 @@ export default function NextActionEditor({
             placeholder="補足や備忘録など"
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors"
+            className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98]"
           >
             保存
           </button>
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="px-4 py-2 text-xs text-brand-muted hover:text-brand-text transition-colors"
+            className="px-4 py-2.5 text-xs text-brand-muted hover:text-brand-text transition-colors"
           >
             キャンセル
           </button>

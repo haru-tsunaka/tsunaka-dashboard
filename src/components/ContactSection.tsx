@@ -121,7 +121,7 @@ function ContactForm({
   return (
     <form action={action} className="bg-white rounded-lg border border-brand-border p-4 space-y-3">
       {contact && <input type="hidden" name="contact_id" value={contact.id} />}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs text-brand-muted mb-1">名前 <span className="text-red-400">*</span></label>
           <input name="contact_name" required defaultValue={contact?.name || ''} className="form-input" placeholder="山田太郎" />
@@ -131,7 +131,7 @@ function ContactForm({
           <input name="contact_name_reading" defaultValue={contact?.name_reading || ''} className="form-input" placeholder="やまだたろう" />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs text-brand-muted mb-1">役職</label>
           <input name="contact_role" defaultValue={contact?.role || ''} className="form-input" placeholder="代表 / 担当者" />
@@ -141,7 +141,7 @@ function ContactForm({
           <input name="contact_department" defaultValue={contact?.department || ''} className="form-input" placeholder="実行委員会 / 広報部" />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs text-brand-muted mb-1">連絡手段</label>
           <select name="contact_method" defaultValue={contact?.contact_method || ''} className="form-input">
@@ -161,17 +161,17 @@ function ContactForm({
         <label className="block text-xs text-brand-muted mb-1">メモ</label>
         <textarea name="contact_memo" rows={2} defaultValue={contact?.memo || ''} className="form-input" placeholder="自由にメモ" />
       </div>
-      <div className="flex items-center gap-2 pt-1">
+      <div className="flex items-center gap-3 pt-1">
         <button
           type="submit"
-          className="px-4 py-2 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors"
+          className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98]"
         >
           {submitLabel}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-xs text-brand-muted hover:text-brand-text transition-colors"
+          className="px-4 py-2.5 text-xs text-brand-muted hover:text-brand-text transition-colors"
         >
           キャンセル
         </button>

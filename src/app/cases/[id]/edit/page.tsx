@@ -65,11 +65,11 @@ export default async function EditCasePage({
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href={`/cases/${id}`} className="text-brand-muted text-sm hover:text-navy transition-colors mb-6 inline-block">
-        &larr; 案件詳細に戻る
+    <div className="max-w-2xl mx-auto px-4 py-4 md:py-8 pb-12">
+      <Link href={`/cases/${id}`} className="text-brand-muted text-sm hover:text-navy transition-colors mb-4 md:mb-6 inline-block py-1">
+        &larr; 戻る
       </Link>
-      <h1 className="font-serif text-navy text-2xl font-bold mb-8">案件を編集</h1>
+      <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">案件を編集</h1>
       <CaseForm initialData={caseData as Case} action={updateCase} />
 
       <div className="mt-16 pt-8 border-t border-brand-border">

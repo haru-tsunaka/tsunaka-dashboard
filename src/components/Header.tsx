@@ -36,16 +36,16 @@ export default function Header() {
 
   return (
     <header className="bg-navy sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <div className="max-w-5xl mx-auto px-4 h-12 md:h-14 flex items-center justify-between">
+        <div className="flex items-center gap-4 md:gap-6">
           <Link href="/" className="flex flex-col">
-            <span className="font-serif text-white text-lg font-bold tracking-wider leading-tight">Hitoha</span>
-            <span className="text-white/35 text-[9px] tracking-wide leading-tight">いまと、これからを、ひとはにのせて。</span>
+            <span className="font-serif text-white text-base md:text-lg font-bold tracking-wider leading-tight">Hitoha</span>
+            <span className="text-white/35 text-[9px] tracking-wide leading-tight hidden md:block">いまと、これからを、ひとはにのせて。</span>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3 md:gap-4">
             <Link
               href="/"
-              className={`text-sm transition-colors ${
+              className={`text-sm py-2 transition-colors ${
                 pathname === '/' ? 'text-white' : 'text-white/50 hover:text-white/80'
               }`}
             >
@@ -54,7 +54,7 @@ export default function Header() {
             {isOwner && (
               <Link
                 href="/analytics"
-                className={`text-sm transition-colors ${
+                className={`text-sm py-2 transition-colors ${
                   pathname === '/analytics' ? 'text-white' : 'text-white/50 hover:text-white/80'
                 }`}
               >
@@ -65,7 +65,7 @@ export default function Header() {
         </div>
         <button
           onClick={handleLogout}
-          className="text-white/50 hover:text-white/80 text-xs tracking-wide transition-colors"
+          className="text-white/50 hover:text-white/80 text-xs tracking-wide transition-colors py-2 pl-4"
         >
           ログアウト
         </button>

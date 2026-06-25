@@ -148,22 +148,22 @@ export default async function CaseDetailPage({
   const isOverdue = c.next_action_by && new Date(c.next_action_by) < new Date();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors mb-6 inline-block">
-        &larr; ダッシュボードに戻る
+    <div className="max-w-3xl mx-auto px-4 py-4 md:py-8 pb-12">
+      <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors mb-4 md:mb-6 inline-block py-1">
+        &larr; 戻る
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="font-serif text-navy text-2xl font-bold mb-2">{c.name}</h1>
-          {c.client_name && <p className="text-brand-muted text-sm">{c.client_name}</p>}
+      <div className="flex items-start justify-between mb-6 md:mb-8 gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-1">{c.name}</h1>
+          {c.client_name && <p className="text-brand-muted text-xs md:text-sm">{c.client_name}</p>}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <StatusBadge status={c.status} />
           <Link
             href={`/cases/${c.id}/edit`}
-            className="px-5 py-2 rounded-lg border border-brand-border text-brand-muted text-xs font-medium hover:border-navy hover:text-navy transition-colors"
+            className="px-4 py-2 rounded-lg border border-brand-border text-brand-muted text-xs font-medium hover:border-navy hover:text-navy transition-colors"
           >
             編集
           </Link>
@@ -171,7 +171,7 @@ export default async function CaseDetailPage({
       </div>
 
       {/* Info sections */}
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Client */}
         <InfoSection label="クライアント">
           <InfoGrid>
@@ -258,8 +258,8 @@ function InfoSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`rounded-lg p-6 ${bg ? 'bg-brand-bg' : ''}`}>
-      <div className="flex items-center gap-3 mb-4">
+    <div className={`rounded-lg p-4 md:p-6 ${bg ? 'bg-brand-bg' : ''}`}>
+      <div className="flex items-center gap-3 mb-3 md:mb-4">
         <div className="w-6 h-px bg-gold" />
         <span className="text-xs font-semibold text-gold tracking-widest">{label}</span>
       </div>
@@ -269,7 +269,7 @@ function InfoSection({
 }
 
 function InfoGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 md:grid-cols-3 gap-4">{children}</div>;
+  return <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">{children}</div>;
 }
 
 function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {

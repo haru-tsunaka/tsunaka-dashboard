@@ -39,11 +39,11 @@ export default function NewCasePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors mb-6 inline-block">
-        &larr; ダッシュボードに戻る
+    <div className="max-w-2xl mx-auto px-4 py-4 md:py-8 pb-12">
+      <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors mb-4 md:mb-6 inline-block py-1">
+        &larr; 戻る
       </Link>
-      <h1 className="font-serif text-navy text-2xl font-bold mb-8">新規案件</h1>
+      <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">新規案件</h1>
       <CaseForm action={createCase} />
     </div>
   );

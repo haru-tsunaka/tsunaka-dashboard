@@ -79,7 +79,7 @@ export default function CaseForm({
 
       {/* ステータス */}
       <Section label="ステータス">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="ステータス">
             <select name="status" defaultValue={data.status} className="form-input">
               {CASE_STATUSES.map((s) => (
@@ -99,7 +99,7 @@ export default function CaseForm({
 
       {/* スケジュール */}
       <Section label="スケジュール">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="イベント・撮影日">
             <input type="date" name="event_date" defaultValue={data.event_date || ''}
               className="form-input" />
@@ -113,7 +113,7 @@ export default function CaseForm({
 
       {/* 収支 */}
       <Section label="収支">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="見積金額（円）">
             <MoneyInput name="quoted_amount" defaultValue={data.quoted_amount} />
           </Field>
@@ -121,7 +121,7 @@ export default function CaseForm({
             <MoneyInput name="expenses" defaultValue={data.expenses} />
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="入金額（円）">
             <MoneyInput name="payment_amount" defaultValue={data.payment_amount} />
           </Field>
@@ -153,10 +153,10 @@ export default function CaseForm({
       </Section>
 
       {/* ボタン */}
-      <div className="flex items-center gap-3 pt-4">
+      <div className="pt-4">
         <button
           type="submit"
-          className="px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
+          className="w-full sm:w-auto px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors active:scale-[0.98]"
         >
           保存
         </button>

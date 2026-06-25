@@ -35,3 +35,19 @@ body {
   outline: none;
   border-color: var(--color-navy);
 }
+
+/* スクロールバー非表示（フィルタータブ用） */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS セーフエリア */
+@supports (padding: env(safe-area-inset-bottom)) {
+  html {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
