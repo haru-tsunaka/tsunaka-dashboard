@@ -33,8 +33,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-brand-bg">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="font-serif text-navy text-3xl font-bold tracking-wider mb-2">Hitoha</h1>
-          <p className="text-brand-muted text-xs tracking-widest">by 繋叶</p>
+          <h1 className="font-serif text-navy text-3xl font-bold tracking-wider mb-3">Hitoha</h1>
+          <p className="text-brand-muted text-xs tracking-wide leading-relaxed">いまと、これからを、ひとはにのせて。</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-white rounded-xl p-8 shadow-sm border border-brand-border">

@@ -3,6 +3,19 @@
 import { useState } from 'react';
 import type { Case } from '@/lib/types';
 import { CASE_STATUSES, PAYMENT_STATUSES, CATEGORIES } from '@/lib/constants';
+import MoneyInput from '@/components/MoneyInput';
+
+function formatForInput(value: string | null) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return value;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
 
 type CaseFormData = Omit<Case, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
 
@@ -19,6 +32,8 @@ const defaultData: CaseFormData = {
   expenses: 0,
   next_action: '',
   next_action_by: null,
+  payment_amount: null,
+  payment_date: null,
   contact_method: '',
   contact_info: '',
   deliverables: '',
@@ -95,15 +110,22 @@ export default function CaseForm({
         </div>
       </Section>
 
-      {/* 予算 */}
-      <Section label="予算">
+      {/* 収支 */}
+      <Section label="収支">
         <div className="grid grid-cols-2 gap-4">
           <Field label="見積金額（円）">
-            <input type="number" name="quoted_amount" defaultValue={data.quoted_amount ?? ''}
-              className="form-input" />
+            <MoneyInput name="quoted_amount" defaultValue={data.quoted_amount} />
           </Field>
           <Field label="経費（円）">
-            <input type="number" name="expenses" defaultValue={data.expenses}
+            <MoneyInput name="expenses" defaultValue={data.expenses} />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="入金額（円）">
+            <MoneyInput name="payment_amount" defaultValue={data.payment_amount} />
+          </Field>
+          <Field label="入金日">
+            <input type="date" name="payment_date" defaultValue={data.payment_date || ''}
               className="form-input" />
           </Field>
         </div>
@@ -116,7 +138,7 @@ export default function CaseForm({
             className="form-input" />
         </Field>
         <Field label="期限">
-          <input type="date" name="next_action_by" defaultValue={data.next_action_by || ''}
+          <input type="datetime-local" name="next_action_by" defaultValue={formatForInput(data.next_action_by)}
             className="form-input" />
         </Field>
       </Section>

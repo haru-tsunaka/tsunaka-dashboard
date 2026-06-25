@@ -37,6 +37,8 @@ export default async function EditCasePage({
         quoted_amount: formData.get('quoted_amount') ? Number(formData.get('quoted_amount')) : null,
         payment_status: formData.get('payment_status') as string,
         expenses: Number(formData.get('expenses')) || 0,
+        payment_amount: formData.get('payment_amount') ? Number(formData.get('payment_amount')) : null,
+        payment_date: (formData.get('payment_date') as string) || null,
         next_action: (formData.get('next_action') as string) || null,
         next_action_by: (formData.get('next_action_by') as string) || null,
         contact_method: (formData.get('contact_method') as string) || null,

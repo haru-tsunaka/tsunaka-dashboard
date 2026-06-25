@@ -20,6 +20,8 @@ export interface Case {
   next_action_by: string | null;
   contact_method: string | null;
   contact_info: string | null;
+  payment_amount: number | null;
+  payment_date: string | null;
   deliverables: string | null;
   user_id: string;
 }

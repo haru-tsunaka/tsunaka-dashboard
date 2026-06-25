@@ -14,6 +14,16 @@ function formatDate(date: string | null) {
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function formatDateTime(date: string | null) {
+  if (!date) return '未定';
+  const d = new Date(date);
+  const dateStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  const h = d.getHours();
+  const m = d.getMinutes();
+  if (h === 0 && m === 0) return dateStr;
+  return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
+}
+
 function formatYen(amount: number | null) {
   if (amount === null || amount === undefined) return '未定';
   return `¥${amount.toLocaleString()}`;
@@ -157,10 +167,11 @@ export default async function CaseDetailPage({
           </InfoGrid>
         </InfoSection>
 
-        {/* Budget */}
-        <InfoSection label="予算" bg>
+        {/* 収支 */}
+        <InfoSection label="収支" bg>
           <InfoGrid>
             <InfoItem label="見積金額" value={formatYen(c.quoted_amount)} />
+            <InfoItem label="入金額" value={formatYen(c.payment_amount)} />
             <InfoItem label="経費" value={formatYen(c.expenses)} />
             <InfoItem
               label="入金状況"
@@ -171,9 +182,10 @@ export default async function CaseDetailPage({
                 </span>
               }
             />
-            {c.quoted_amount !== null && (
-              <InfoItem label="粗利" value={formatYen(c.quoted_amount - c.expenses)} />
+            {c.payment_amount !== null && (
+              <InfoItem label="粗利" value={formatYen(c.payment_amount - c.expenses)} />
             )}
+            <InfoItem label="入金日" value={c.payment_date ? formatDate(c.payment_date) : '未入金'} />
           </InfoGrid>
         </InfoSection>
 
@@ -182,7 +194,7 @@ export default async function CaseDetailPage({
           <div className={isOverdue ? 'text-red-600' : ''}>
             <p className="text-sm whitespace-pre-wrap">{c.next_action || '未設定'}</p>
             {c.next_action_by && (
-              <p className="text-xs text-brand-muted mt-2">期限: {formatDate(c.next_action_by)}</p>
+              <p className="text-xs text-brand-muted mt-2">期限: {formatDateTime(c.next_action_by)}</p>
             )}
           </div>
         </InfoSection>

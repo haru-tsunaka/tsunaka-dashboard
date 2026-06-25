@@ -19,6 +19,19 @@ function formatDateShort(date: string | null) {
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function formatDateTime(date: string | null) {
+  if (!date) return null;
+  const d = new Date(date);
+  const now = new Date();
+  const dateStr = d.getFullYear() === now.getFullYear()
+    ? `${d.getMonth() + 1}/${d.getDate()}`
+    : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  const h = d.getHours();
+  const m = d.getMinutes();
+  if (h === 0 && m === 0) return dateStr;
+  return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
+}
+
 function formatYen(amount: number | null) {
   if (amount === null || amount === undefined) return null;
   return `¥${amount.toLocaleString()}`;
@@ -27,10 +40,15 @@ function formatYen(amount: number | null) {
 export default function CaseCard({ c }: { c: Case }) {
   const nearestDate = c.event_date || c.deadline;
   const isOverdue = c.next_action_by && new Date(c.next_action_by) < new Date();
+  const isCompleted = c.status === '完了';
 
   return (
     <Link href={`/cases/${c.id}`} className="block">
-      <div className="bg-white rounded-lg border border-brand-border p-5 hover:shadow-md transition-shadow">
+      <div className={`rounded-lg border p-5 transition-shadow ${
+        isCompleted
+          ? 'bg-gray-200 border-gray-300'
+          : 'bg-white border-brand-border hover:shadow-md'
+      }`}>
         <div className="flex items-start justify-between mb-3">
           <div className="min-w-0 flex-1">
             <h3 className="font-serif font-bold text-navy text-base truncate">{c.name}</h3>
@@ -42,9 +60,13 @@ export default function CaseCard({ c }: { c: Case }) {
         </div>
 
         {c.next_action && (
-          <div className={`text-sm mb-3 ${isOverdue ? 'text-red-600' : 'text-brand-text'}`}>
-            <span className="text-brand-muted text-xs">次: </span>
-            <span className="line-clamp-1">{c.next_action}</span>
+          <div className={`mb-3 ${isOverdue ? 'text-red-600' : 'text-brand-text'}`}>
+            <p className="text-sm line-clamp-1">{c.next_action}</p>
+            {c.next_action_by && (
+              <p className={`text-xs mt-0.5 ${isOverdue ? 'text-red-600 font-medium' : 'text-brand-muted'}`}>
+                {isOverdue ? '期限切れ ' : ''}{formatDateTime(c.next_action_by)}
+              </p>
+            )}
           </div>
         )}
 

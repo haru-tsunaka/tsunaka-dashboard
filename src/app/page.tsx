@@ -22,11 +22,15 @@ export default async function DashboardPage({
   }
 
   const { data: cases } = await query;
+  const allCases = (cases || []) as Case[];
+  const activeCases = allCases.filter((c) => c.status !== '完了');
+  const completedCases = allCases.filter((c) => c.status === '完了');
+  const showSplit = !filterStatus || filterStatus === '';
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Filter tabs */}
-      <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-2">
+      <div className="flex items-center gap-0.5 mb-8 overflow-x-auto pb-2 border-b border-brand-border">
         <FilterTab label="全て" value="" current={filterStatus} />
         {CASE_STATUSES.map((s) => (
           <FilterTab key={s} label={s} value={s} current={filterStatus} />
@@ -34,12 +38,30 @@ export default async function DashboardPage({
       </div>
 
       {/* Case grid */}
-      {cases && cases.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cases.map((c: Case) => (
-            <CaseCard key={c.id} c={c} />
-          ))}
-        </div>
+      {allCases.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(showSplit ? activeCases : allCases).map((c: Case) => (
+              <CaseCard key={c.id} c={c} />
+            ))}
+          </div>
+
+          {/* 完了案件（全て表示時のみ分離） */}
+          {showSplit && completedCases.length > 0 && (
+            <>
+              <div className="flex items-center gap-3 mt-10 mb-4">
+                <div className="flex-1 h-px bg-brand-border" />
+                <span className="text-xs text-brand-muted">完了 ({completedCases.length})</span>
+                <div className="flex-1 h-px bg-brand-border" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {completedCases.map((c: Case) => (
+                  <CaseCard key={c.id} c={c} />
+                ))}
+              </div>
+            </>
+          )}
+        </>
       ) : (
         <div className="text-center py-20">
           <p className="text-brand-muted text-sm mb-6">まだ案件がありません</p>
@@ -85,10 +107,10 @@ function FilterTab({
   return (
     <Link
       href={value ? `/?status=${value}` : '/'}
-      className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm transition-colors ${
+      className={`whitespace-nowrap px-3 py-2 text-sm transition-colors border-b-2 -mb-px ${
         isActive
-          ? 'bg-navy text-white'
-          : 'text-brand-muted hover:bg-navy/5'
+          ? 'border-navy text-navy font-medium'
+          : 'border-transparent text-brand-muted hover:text-navy/70'
       }`}
     >
       {label}

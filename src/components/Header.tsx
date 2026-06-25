@@ -38,9 +38,9 @@ export default function Header() {
     <header className="bg-navy sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-serif text-white text-lg font-bold tracking-wider">Hitoha</span>
-            <span className="text-white/40 text-[10px] tracking-widest ml-1.5">by 繋叶</span>
+          <Link href="/" className="flex flex-col">
+            <span className="font-serif text-white text-lg font-bold tracking-wider leading-tight">Hitoha</span>
+            <span className="text-white/35 text-[9px] tracking-wide leading-tight">いまと、これからを、ひとはにのせて。</span>
           </Link>
           <nav className="flex items-center gap-4">
             <Link
@@ -58,7 +58,7 @@ export default function Header() {
                   pathname === '/analytics' ? 'text-white' : 'text-white/50 hover:text-white/80'
                 }`}
               >
-                KPI
+                レポート
               </Link>
             )}
           </nav>
