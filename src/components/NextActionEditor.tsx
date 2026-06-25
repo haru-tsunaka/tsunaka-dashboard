@@ -30,14 +30,17 @@ export default function NextActionEditor({
   nextActionMemo,
   isOverdue,
   action,
+  completeAction,
 }: {
   nextAction: string | null;
   nextActionBy: string | null;
   nextActionMemo: string | null;
   isOverdue: boolean;
   action: (formData: FormData) => Promise<void>;
+  completeAction: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   if (editing) {
     return (
@@ -93,13 +96,22 @@ export default function NextActionEditor({
     );
   }
 
+  if (!nextAction) {
+    return (
+      <div
+        onClick={() => setEditing(true)}
+        className="cursor-pointer group rounded-lg p-3 -m-3 hover:bg-brand-bg transition-colors"
+      >
+        <p className="text-sm text-brand-muted">未設定</p>
+        <p className="text-[10px] text-brand-muted/0 group-hover:text-brand-muted/50 transition-colors mt-1">タップして追加</p>
+      </div>
+    );
+  }
+
   return (
-    <div
-      onClick={() => setEditing(true)}
-      className="cursor-pointer group rounded-lg p-3 -m-3 hover:bg-brand-bg transition-colors"
-    >
+    <div className="rounded-lg p-3 -m-3">
       <div className={isOverdue ? 'text-red-600' : ''}>
-        <p className="text-sm whitespace-pre-wrap">{nextAction || '未設定'}</p>
+        <p className="text-sm whitespace-pre-wrap">{nextAction}</p>
         {nextActionBy && (
           <p className={`text-xs mt-2 ${isOverdue ? 'text-red-600 font-medium' : 'text-brand-muted'}`}>
             期限: {formatDateTime(nextActionBy)}
@@ -109,7 +121,25 @@ export default function NextActionEditor({
           <p className="text-xs text-brand-muted mt-2 whitespace-pre-wrap border-t border-brand-border pt-2">{nextActionMemo}</p>
         )}
       </div>
-      <p className="text-[10px] text-brand-muted/0 group-hover:text-brand-muted/50 transition-colors mt-1">クリックして編集</p>
+      <div className="flex items-center gap-3 mt-4">
+        <button
+          onClick={async () => {
+            setCompleting(true);
+            await completeAction();
+            setCompleting(false);
+          }}
+          disabled={completing}
+          className="px-5 py-2.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 transition-colors active:scale-[0.98] disabled:opacity-50"
+        >
+          {completing ? '完了処理中...' : '完了'}
+        </button>
+        <button
+          onClick={() => setEditing(true)}
+          className="px-4 py-2.5 text-xs text-brand-muted hover:text-navy transition-colors"
+        >
+          編集
+        </button>
+      </div>
     </div>
   );
 }

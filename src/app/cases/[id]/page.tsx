@@ -137,6 +137,43 @@ export default async function CaseDetailPage({
     revalidatePath('/');
   }
 
+  async function completeNextAction() {
+    'use server';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    // 現在のネクストアクションを取得
+    const { data: current } = await supabase
+      .from('cases')
+      .select('next_action, next_action_by, next_action_memo')
+      .eq('id', id)
+      .single();
+
+    if (current?.next_action) {
+      // 進捗ログに記録
+      let logContent = `✅ ${current.next_action}`;
+      if (current.next_action_memo) {
+        logContent += `\n${current.next_action_memo}`;
+      }
+      await supabase.from('progress_logs').insert({
+        case_id: id,
+        content: logContent,
+        user_id: user.id,
+      });
+
+      // ネクストアクションをクリア
+      await supabase.from('cases').update({
+        next_action: null,
+        next_action_by: null,
+        next_action_memo: null,
+      }).eq('id', id);
+    }
+
+    revalidatePath(`/cases/${id}`);
+    revalidatePath('/');
+  }
+
   async function deleteCase() {
     'use server';
     const supabase = await createClient();
@@ -230,6 +267,7 @@ export default async function CaseDetailPage({
             nextActionMemo={c.next_action_memo}
             isOverdue={!!isOverdue}
             action={updateNextAction}
+            completeAction={completeNextAction}
           />
         </InfoSection>
 
