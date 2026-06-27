@@ -24,6 +24,16 @@ export interface Case {
   payment_amount: number | null;
   payment_date: string | null;
   deliverables: string | null;
+  menu: string | null;
+  plan: string | null;
+  est_hours_hearing: number | null;
+  est_hours_planning: number | null;
+  est_hours_shooting: number | null;
+  est_hours_editing: number | null;
+  actual_hours_hearing: number | null;
+  actual_hours_planning: number | null;
+  actual_hours_shooting: number | null;
+  actual_hours_editing: number | null;
   user_id: string;
 }
 
@@ -47,5 +57,18 @@ export interface ProgressLog {
   created_at: string;
   title: string | null;
   content: string;
+  work_phase: string | null;
+  hours: number | null;
+  started_at: string | null;
+  ended_at: string | null;
+  is_cancelled: boolean;
   user_id: string;
 }
+
+export const WORK_PHASES = [
+  { value: 'hearing', label: 'ヒアリング' },
+  { value: 'planning', label: '企画・構成' },
+  { value: 'shooting', label: '撮影' },
+  { value: 'editing', label: '編集〜納品' },
+  { value: 'other', label: 'その他' },
+] as const;

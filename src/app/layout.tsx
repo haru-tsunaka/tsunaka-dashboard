@@ -13,7 +13,7 @@ const notoSerifJP = Noto_Serif_JP({
 
 export const metadata: Metadata = {
   title: "繋叶 Hitoha",
-  description: "繋叶 Hitoha — 案件管理・KPI",
+  description: "繋叶 Hitoha — いまと、これからを、ひとはにのせて。",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   manifest: "/manifest.json",
   icons: {

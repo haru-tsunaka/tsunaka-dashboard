@@ -6,31 +6,10 @@ import StatusBadge from '@/components/StatusBadge';
 import ProgressLogSection from '@/components/ProgressLog';
 import ContactSection from '@/components/ContactSection';
 import Link from 'next/link';
-import { PAYMENT_COLORS } from '@/lib/constants';
+import { PAYMENT_COLORS, HOURLY_RATE } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
 import NextActionEditor from '@/components/NextActionEditor';
-
-function formatDate(date: string | null) {
-  if (!date) return '未定';
-  const d = new Date(date + 'T00:00:00');
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function formatDateTime(date: string | null) {
-  if (!date) return '未定';
-  const d = new Date(date);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  const dateStr = `${jst.getUTCFullYear()}/${jst.getUTCMonth() + 1}/${jst.getUTCDate()}`;
-  const h = jst.getUTCHours();
-  const m = jst.getUTCMinutes();
-  if (h === 0 && m === 0) return dateStr;
-  return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
-}
-
-function formatYen(amount: number | null) {
-  if (amount === null || amount === undefined) return '未定';
-  return `¥${amount.toLocaleString()}`;
-}
+import { formatDate, formatDateTime, formatYen } from '@/lib/formatting';
 
 export default async function CaseDetailPage({
   params,
@@ -62,23 +41,11 @@ export default async function CaseDetailPage({
     .eq('case_id', id)
     .order('created_at', { ascending: true });
 
-  async function addLog(formData: FormData) {
+  async function cancelLog(formData: FormData) {
     'use server';
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
-
-    const title = formData.get('title') as string;
-    const content = formData.get('content') as string;
-    if (!title?.trim() && !content?.trim()) return;
-
-    await supabase.from('progress_logs').insert({
-      case_id: id,
-      title: title?.trim() || null,
-      content: content?.trim() || '',
-      user_id: user.id,
-    });
-
+    const logId = formData.get('log_id') as string;
+    await supabase.from('progress_logs').update({ is_cancelled: true }).eq('id', logId);
     revalidatePath(`/cases/${id}`);
   }
 
@@ -153,13 +120,8 @@ export default async function CaseDetailPage({
       .single();
 
     if (current?.next_action) {
-      // 進捗ログに記録
-      await supabase.from('progress_logs').insert({
-        case_id: id,
-        title: current.next_action,
-        content: current.next_action_memo || '',
-        user_id: user.id,
-      });
+      const title = current.next_action;
+      const memo = current.next_action_memo || '';
 
       // ネクストアクションをクリア
       await supabase.from('cases').update({
@@ -167,6 +129,14 @@ export default async function CaseDetailPage({
         next_action_by: null,
         next_action_memo: null,
       }).eq('id', id);
+
+      revalidatePath(`/cases/${id}`);
+      revalidatePath('/');
+
+      // きろくページへリダイレクト（内容を引き継ぎ）
+      const params = new URLSearchParams({ case_id: id, title });
+      if (memo) params.set('content', memo);
+      redirect(`/log?${params.toString()}`);
     }
 
     revalidatePath(`/cases/${id}`);
@@ -231,17 +201,80 @@ export default async function CaseDetailPage({
         {/* Schedule */}
         <InfoSection label="スケジュール">
           <InfoGrid>
-            <InfoItem label="イベント・撮影日" value={formatDate(c.event_date)} />
-            <InfoItem label="納期" value={formatDate(c.deadline)} />
+            <InfoItem label="イベント・撮影日" value={formatDate(c.event_date, '未定')} />
+            <InfoItem label="納期" value={formatDate(c.deadline, '未定')} />
           </InfoGrid>
         </InfoSection>
+
+        {/* つくるもの */}
+        <InfoSection label="つくるもの" bg>
+          <p className="text-sm whitespace-pre-wrap">{c.deliverables || '未設定'}</p>
+        </InfoSection>
+
+        {/* 見積もり */}
+        {(c.est_hours_hearing !== null || c.est_hours_planning !== null || c.est_hours_shooting !== null || c.est_hours_editing !== null) && (
+          <InfoSection label="見積もり">
+            <HoursRow
+              label="想定工数"
+              hearing={c.est_hours_hearing}
+              planning={c.est_hours_planning}
+              shooting={c.est_hours_shooting}
+              editing={c.est_hours_editing}
+            />
+          </InfoSection>
+        )}
+
+        {/* 実績工数（進捗ログから自動集計） */}
+        {(() => {
+          const actualByPhase: Record<string, number> = {};
+          (logs || []).forEach((log) => {
+            const l = log as ProgressLog;
+            const h = Number(l.hours);
+            if (l.work_phase && h > 0 && !l.is_cancelled) {
+              actualByPhase[l.work_phase] = (actualByPhase[l.work_phase] || 0) + h;
+            }
+          });
+          const hasActual = Object.keys(actualByPhase).length > 0;
+          if (!hasActual) return null;
+
+          const actHearing = actualByPhase['hearing'] || 0;
+          const actPlanning = actualByPhase['planning'] || 0;
+          const actShooting = actualByPhase['shooting'] || 0;
+          const actEditing = actualByPhase['editing'] || 0;
+          const actOther = actualByPhase['other'] || 0;
+          const actTotal = actHearing + actPlanning + actShooting + actEditing + actOther;
+
+          const estTotal = (c.est_hours_hearing || 0) + (c.est_hours_planning || 0) + (c.est_hours_shooting || 0) + (c.est_hours_editing || 0);
+          const hasEst = estTotal > 0;
+          const diff = actTotal - estTotal;
+
+          return (
+            <InfoSection label="実績工数">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <InfoItem label="ヒアリング" value={actHearing > 0 ? `${actHearing}h` : '-'} />
+                <InfoItem label="企画・構成" value={actPlanning > 0 ? `${actPlanning}h` : '-'} />
+                <InfoItem label="撮影" value={actShooting > 0 ? `${actShooting}h` : '-'} />
+                <InfoItem label="編集〜納品" value={actEditing > 0 ? `${actEditing}h` : '-'} />
+              </div>
+              <p className="text-xs text-brand-muted mt-2">
+                合計: <span className="font-bold text-navy">{actTotal}h</span>
+                {actOther > 0 && <span className="ml-1">（その他 {actOther}h 含む）</span>}
+              </p>
+              {hasEst && (
+                <p className={`text-xs mt-1 ${diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  見積もり比: {diff > 0 ? '+' : ''}{diff}h ({diff > 0 ? '+' : ''}{formatYen(diff * HOURLY_RATE)})
+                </p>
+              )}
+            </InfoSection>
+          );
+        })()}
 
         {/* 収支 */}
         <InfoSection label="収支" bg>
           <InfoGrid>
-            <InfoItem label="見積金額" value={formatYen(c.quoted_amount)} />
-            <InfoItem label="入金額" value={formatYen(c.payment_amount)} />
-            <InfoItem label="経費" value={formatYen(c.expenses)} />
+            <InfoItem label="見積金額" value={formatYen(c.quoted_amount, '未定')} />
+            <InfoItem label="入金額" value={formatYen(c.payment_amount, '未定')} />
+            <InfoItem label="経費" value={formatYen(c.expenses, '未定')} />
             <InfoItem
               label="入金状況"
               value={
@@ -270,14 +303,9 @@ export default async function CaseDetailPage({
           />
         </InfoSection>
 
-        {/* Deliverables */}
-        <InfoSection label="納品物" bg>
-          <p className="text-sm whitespace-pre-wrap">{c.deliverables || '未設定'}</p>
-        </InfoSection>
-
         {/* Progress Log */}
         <InfoSection label="進捗ログ">
-          <ProgressLogSection logs={(logs || []) as ProgressLog[]} addLogAction={addLog} />
+          <ProgressLogSection logs={(logs || []) as ProgressLog[]} caseId={id} cancelLogAction={cancelLog} />
         </InfoSection>
       </div>
 
@@ -314,6 +342,37 @@ function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
     <div>
       <p className="text-xs text-brand-muted mb-0.5">{label}</p>
       <div className="text-sm font-medium">{value}</div>
+    </div>
+  );
+}
+
+function HoursRow({
+  label,
+  hearing,
+  planning,
+  shooting,
+  editing,
+}: {
+  label: string;
+  hearing: number | null;
+  planning: number | null;
+  shooting: number | null;
+  editing: number | null;
+}) {
+  const total = (hearing || 0) + (planning || 0) + (shooting || 0) + (editing || 0);
+  return (
+    <div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <InfoItem label="ヒアリング" value={hearing !== null ? `${hearing}h` : '-'} />
+        <InfoItem label="企画・構成" value={planning !== null ? `${planning}h` : '-'} />
+        <InfoItem label="撮影" value={shooting !== null ? `${shooting}h` : '-'} />
+        <InfoItem label="編集〜納品" value={editing !== null ? `${editing}h` : '-'} />
+      </div>
+      {total > 0 && (
+        <p className="text-xs text-brand-muted mt-2">
+          合計: <span className="font-bold text-navy">{total}h</span>
+        </p>
+      )}
     </div>
   );
 }

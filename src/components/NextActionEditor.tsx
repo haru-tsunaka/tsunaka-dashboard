@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { formatDateTime } from '@/lib/formatting';
+import SubmitButton from './SubmitButton';
 
 function formatForInput(value: string | null) {
   if (!value) return '';
@@ -12,16 +14,6 @@ function formatForInput(value: string | null) {
   const hh = String(d.getHours()).padStart(2, '0');
   const min = String(d.getMinutes()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-}
-
-function formatDateTime(date: string | null) {
-  if (!date) return null;
-  const d = new Date(date);
-  const dateStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-  const h = d.getHours();
-  const m = d.getMinutes();
-  if (h === 0 && m === 0) return dateStr;
-  return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
 }
 
 export default function NextActionEditor({
@@ -78,12 +70,11 @@ export default function NextActionEditor({
           />
         </div>
         <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98]"
-          >
-            保存
-          </button>
+          <SubmitButton
+            label="保存"
+            pendingLabel="保存中..."
+            className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98] disabled:opacity-50"
+          />
           <button
             type="button"
             onClick={() => setEditing(false)}

@@ -2,41 +2,7 @@ import Link from 'next/link';
 import type { Case } from '@/lib/types';
 import StatusBadge from './StatusBadge';
 import { PAYMENT_COLORS } from '@/lib/constants';
-
-function formatDate(date: string | null) {
-  if (!date) return null;
-  const d = new Date(date);
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function formatDateShort(date: string | null) {
-  if (!date) return null;
-  const d = new Date(date + 'T00:00:00');
-  const now = new Date();
-  if (d.getFullYear() === now.getFullYear()) {
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  }
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function formatDateTime(date: string | null) {
-  if (!date) return null;
-  const d = new Date(date);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const dateStr = jst.getUTCFullYear() === now.getUTCFullYear()
-    ? `${jst.getUTCMonth() + 1}/${jst.getUTCDate()}`
-    : `${jst.getUTCFullYear()}/${jst.getUTCMonth() + 1}/${jst.getUTCDate()}`;
-  const h = jst.getUTCHours();
-  const m = jst.getUTCMinutes();
-  if (h === 0 && m === 0) return dateStr;
-  return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
-}
-
-function formatYen(amount: number | null) {
-  if (amount === null || amount === undefined) return null;
-  return `¥${amount.toLocaleString()}`;
-}
+import { formatDate, formatDateTime, formatYen } from '@/lib/formatting';
 
 export default function CaseCard({ c }: { c: Case }) {
   const nearestDate = c.event_date || c.deadline;
@@ -78,9 +44,9 @@ export default function CaseCard({ c }: { c: Case }) {
             {nearestDate && (
               <span>{formatDate(nearestDate)}</span>
             )}
-            {c.quoted_amount !== null && (
+            {(c.payment_amount ?? c.quoted_amount) !== null && (
               <span className="flex items-center gap-1">
-                {formatYen(c.quoted_amount)}
+                {formatYen(c.payment_amount ?? c.quoted_amount)}
                 <span className={`w-1.5 h-1.5 rounded-full ${PAYMENT_COLORS[c.payment_status]}`} />
               </span>
             )}

@@ -71,12 +71,12 @@ export default async function DashboardPage({
         </>
       ) : (
         <div className="text-center py-20">
-          <p className="text-brand-muted text-sm mb-6">まだ案件がありません</p>
+          <p className="text-brand-muted text-sm mb-6">まだおもいがありません</p>
           <Link
             href="/cases/new"
             className="inline-block px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
           >
-            最初の案件を追加する
+            最初のおもいをつくる
           </Link>
         </div>
       )}
@@ -94,7 +94,7 @@ export default async function DashboardPage({
           href="/cases/new"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium text-sm tracking-wide shadow-lg hover:bg-navy-light transition-colors"
         >
-          + 新規案件
+          + あたらしいおもい
         </Link>
       </div>
     </div>

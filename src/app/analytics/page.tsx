@@ -4,9 +4,7 @@ import type { Case } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
 
-function formatYen(amount: number) {
-  return `¥${Math.round(amount).toLocaleString()}`;
-}
+import { formatYen } from '@/lib/formatting';
 
 function getMonthKey(date: string) {
   const d = new Date(date + 'T00:00:00');
@@ -217,9 +215,9 @@ export default async function AnalyticsPage({
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-serif text-navy text-2xl font-bold">レポート</h1>
+        <h1 className="font-serif text-navy text-2xl font-bold">あゆみ</h1>
         <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors">
-          案件一覧へ &rarr;
+          おもいへ &rarr;
         </Link>
       </div>
 
@@ -319,7 +317,7 @@ export default async function AnalyticsPage({
         <SectionLabel label="概要" />
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
-            <p className="text-xs text-brand-muted mb-1">案件数</p>
+            <p className="text-xs text-brand-muted mb-1">おもいの数</p>
             <p className="text-2xl font-bold text-navy">{totalCases}</p>
           </div>
           <div className="text-center">

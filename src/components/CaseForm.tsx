@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Case } from '@/lib/types';
-import { CASE_STATUSES, PAYMENT_STATUSES, CATEGORIES } from '@/lib/constants';
+import { CASE_STATUSES, PAYMENT_STATUSES, CATEGORIES, HOURLY_RATE } from '@/lib/constants';
 import MoneyInput from '@/components/MoneyInput';
+import { toHalfWidth } from '@/lib/formatting';
+import SubmitButton from './SubmitButton';
 
 function formatForInput(value: string | null) {
   if (!value) return '';
@@ -38,6 +40,16 @@ const defaultData: CaseFormData = {
   contact_method: '',
   contact_info: '',
   deliverables: '',
+  menu: null,
+  plan: null,
+  est_hours_hearing: null,
+  est_hours_planning: null,
+  est_hours_shooting: null,
+  est_hours_editing: null,
+  actual_hours_hearing: null,
+  actual_hours_planning: null,
+  actual_hours_shooting: null,
+  actual_hours_editing: null,
 };
 
 export default function CaseForm({
@@ -52,11 +64,37 @@ export default function CaseForm({
     return { ...defaultData, ...initialData };
   });
 
+  const [estHearing, setEstHearing] = useState(data.est_hours_hearing ?? '');
+  const [estPlanning, setEstPlanning] = useState(data.est_hours_planning ?? '');
+  const [estShooting, setEstShooting] = useState(data.est_hours_shooting ?? '');
+  const [estEditing, setEstEditing] = useState(data.est_hours_editing ?? '');
+  const [quotedAmount, setQuotedAmount] = useState(data.quoted_amount);
+  const [manualOverride, setManualOverride] = useState(false);
+
+  // 工数変更時に見積金額を自動計算（手動上書きでない場合）
+  useEffect(() => {
+    if (manualOverride) return;
+    const total =
+      (Number(estHearing) || 0) +
+      (Number(estPlanning) || 0) +
+      (Number(estShooting) || 0) +
+      (Number(estEditing) || 0);
+    if (total > 0) {
+      setQuotedAmount(total * HOURLY_RATE);
+    }
+  }, [estHearing, estPlanning, estShooting, estEditing, manualOverride]);
+
+  const totalEst =
+    (Number(estHearing) || 0) +
+    (Number(estPlanning) || 0) +
+    (Number(estShooting) || 0) +
+    (Number(estEditing) || 0);
+
   return (
     <form action={action} className="space-y-8">
       {/* 基本情報 */}
       <Section label="基本情報">
-        <Field label="案件名" required>
+        <Field label="おもいの名前" required>
           <input name="name" defaultValue={data.name} required
             className="form-input" />
         </Field>
@@ -71,7 +109,7 @@ export default function CaseForm({
             ))}
           </select>
         </Field>
-        <Field label="案件概要">
+        <Field label="概要">
           <textarea name="description" defaultValue={data.description || ''} rows={3}
             className="form-input" />
         </Field>
@@ -111,11 +149,52 @@ export default function CaseForm({
         </div>
       </Section>
 
+      {/* つくるもの */}
+      <Section label="つくるもの">
+        <Field label="納品物">
+          <textarea name="deliverables" defaultValue={data.deliverables || ''} rows={3}
+            className="form-input" placeholder="例: PR動画（3分）、レタッチ済み写真20枚" />
+        </Field>
+      </Section>
+
+      {/* 見積もり */}
+      <Section label="見積もり">
+        <div className="p-4 bg-brand-bg rounded-lg space-y-3">
+          <p className="text-xs font-semibold text-brand-muted tracking-wide mb-2">想定工数</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <HoursInput label="ヒアリング" name="est_hours_hearing" value={estHearing} onChange={setEstHearing} />
+            <HoursInput label="企画・構成" name="est_hours_planning" value={estPlanning} onChange={setEstPlanning} />
+            <HoursInput label="撮影" name="est_hours_shooting" value={estShooting} onChange={setEstShooting} />
+            <HoursInput label="編集〜納品" name="est_hours_editing" value={estEditing} onChange={setEstEditing} />
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-brand-border">
+            <span className="text-xs text-brand-muted">
+              合計: <span className="font-bold text-navy">{totalEst}h</span>
+              <span className="ml-2 text-brand-muted/60">x {HOURLY_RATE.toLocaleString()}円</span>
+            </span>
+            <span className="text-sm font-bold text-navy">
+              {quotedAmount !== null ? `¥${quotedAmount.toLocaleString()}` : '-'}
+            </span>
+          </div>
+        </div>
+      </Section>
+
       {/* 収支 */}
       <Section label="収支">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="見積金額（円）">
-            <MoneyInput name="quoted_amount" defaultValue={data.quoted_amount} />
+            <input type="hidden" name="quoted_amount" value={quotedAmount ?? ''} />
+            <input
+              type="text"
+              inputMode="numeric"
+              value={quotedAmount !== null ? quotedAmount.toLocaleString() : ''}
+              onChange={(e) => {
+                const num = Number(e.target.value.replace(/[^0-9]/g, ''));
+                setQuotedAmount(num || null);
+                setManualOverride(true);
+              }}
+              className="form-input"
+            />
           </Field>
           <Field label="経費（円）">
             <MoneyInput name="expenses" defaultValue={data.expenses} />
@@ -144,24 +223,51 @@ export default function CaseForm({
         </Field>
       </Section>
 
-      {/* 納品物 */}
-      <Section label="納品物">
-        <Field label="納品物">
-          <textarea name="deliverables" defaultValue={data.deliverables || ''} rows={3}
-            className="form-input" placeholder="例: 公式PV（2〜3分）、レタッチ済み写真20枚" />
-        </Field>
-      </Section>
-
       {/* ボタン */}
       <div className="pt-4">
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors active:scale-[0.98]"
-        >
-          保存
-        </button>
+        <SubmitButton
+          label="保存"
+          pendingLabel="保存中..."
+          className="w-full sm:w-auto px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors active:scale-[0.98] disabled:opacity-50"
+        />
       </div>
     </form>
+  );
+}
+
+function HoursInput({
+  label,
+  name,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: number | string;
+  onChange?: (v: number | string) => void;
+}) {
+  const [display, setDisplay] = useState(value !== '' && value !== null ? String(value) : '');
+
+  return (
+    <div>
+      <label className="block text-xs text-brand-muted mb-1">{label}</label>
+      <div className="relative">
+        <input
+          type="text"
+          inputMode="decimal"
+          name={name}
+          value={display}
+          onChange={(e) => {
+            const v = toHalfWidth(e.target.value).replace(/[^0-9.]/g, '');
+            setDisplay(v);
+            onChange?.(v === '' ? '' : Number(v));
+          }}
+          placeholder="0"
+          className="form-input pr-6 text-right"
+        />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted">h</span>
+      </div>
+    </div>
   );
 }
 

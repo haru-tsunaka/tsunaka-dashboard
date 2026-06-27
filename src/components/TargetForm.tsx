@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import MoneyInput from '@/components/MoneyInput';
+import SubmitButton from './SubmitButton';
 
 export default function TargetForm({
   year,
@@ -39,12 +40,11 @@ export default function TargetForm({
         <div className="flex-1">
           <MoneyInput name="annual_target" defaultValue={currentTarget || null} placeholder="例: 600,000" />
         </div>
-        <button
-          type="submit"
-          className="px-4 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors whitespace-nowrap"
-        >
-          {hasTarget ? '更新' : '設定'}
-        </button>
+        <SubmitButton
+          label={hasTarget ? '更新' : '設定'}
+          pendingLabel="保存中..."
+          className="px-4 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors whitespace-nowrap disabled:opacity-50"
+        />
         {hasTarget && (
           <button
             type="button"

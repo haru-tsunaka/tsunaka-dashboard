@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { CaseContact } from '@/lib/types';
+import SubmitButton from './SubmitButton';
 
 export default function ContactSection({
   contacts,
@@ -162,12 +163,11 @@ function ContactForm({
         <textarea name="contact_memo" rows={2} defaultValue={contact?.memo || ''} className="form-input" placeholder="自由にメモ" />
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <button
-          type="submit"
-          className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98]"
-        >
-          {submitLabel}
-        </button>
+        <SubmitButton
+          label={submitLabel}
+          pendingLabel={`${submitLabel}中...`}
+          className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98] disabled:opacity-50"
+        />
         <button
           type="button"
           onClick={onCancel}

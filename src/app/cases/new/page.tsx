@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import CaseForm from '@/components/CaseForm';
 import Link from 'next/link';
+import { numOrNull } from '@/lib/formatting';
 
 export default function NewCasePage() {
   async function createCase(formData: FormData) {
@@ -19,16 +20,26 @@ export default function NewCasePage() {
       status: formData.get('status') as string,
       event_date: (formData.get('event_date') as string) || null,
       deadline: (formData.get('deadline') as string) || null,
-      quoted_amount: formData.get('quoted_amount') ? Number(formData.get('quoted_amount')) : null,
+      quoted_amount: numOrNull(formData, 'quoted_amount'),
       payment_status: formData.get('payment_status') as string,
       expenses: Number(formData.get('expenses')) || 0,
-      payment_amount: formData.get('payment_amount') ? Number(formData.get('payment_amount')) : null,
+      payment_amount: numOrNull(formData, 'payment_amount'),
       payment_date: (formData.get('payment_date') as string) || null,
       next_action: (formData.get('next_action') as string) || null,
       next_action_by: (formData.get('next_action_by') as string) || null,
       contact_method: (formData.get('contact_method') as string) || null,
       contact_info: (formData.get('contact_info') as string) || null,
       deliverables: (formData.get('deliverables') as string) || null,
+      menu: (formData.get('menu') as string) || null,
+      plan: (formData.get('plan') as string) || null,
+      est_hours_hearing: numOrNull(formData, 'est_hours_hearing'),
+      est_hours_planning: numOrNull(formData, 'est_hours_planning'),
+      est_hours_shooting: numOrNull(formData, 'est_hours_shooting'),
+      est_hours_editing: numOrNull(formData, 'est_hours_editing'),
+      actual_hours_hearing: numOrNull(formData, 'actual_hours_hearing'),
+      actual_hours_planning: numOrNull(formData, 'actual_hours_planning'),
+      actual_hours_shooting: numOrNull(formData, 'actual_hours_shooting'),
+      actual_hours_editing: numOrNull(formData, 'actual_hours_editing'),
       user_id: user.id,
     });
 
@@ -43,7 +54,7 @@ export default function NewCasePage() {
       <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors mb-4 md:mb-6 inline-block py-1">
         &larr; 戻る
       </Link>
-      <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">新規案件</h1>
+      <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">あたらしいおもい</h1>
       <CaseForm action={createCase} />
     </div>
   );

@@ -49,17 +49,35 @@ export default function Header() {
                 pathname === '/' ? 'text-white' : 'text-white/50 hover:text-white/80'
               }`}
             >
-              案件
+              おもい
+            </Link>
+            <Link
+              href="/log"
+              className={`text-sm py-2 transition-colors ${
+                pathname === '/log' ? 'text-white' : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              きろく
             </Link>
             {isOwner && (
-              <Link
-                href="/analytics"
-                className={`text-sm py-2 transition-colors ${
-                  pathname === '/analytics' ? 'text-white' : 'text-white/50 hover:text-white/80'
-                }`}
-              >
-                レポート
-              </Link>
+              <>
+                <Link
+                  href="/analytics"
+                  className={`text-sm py-2 transition-colors ${
+                    pathname === '/analytics' ? 'text-white' : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  あゆみ
+                </Link>
+                <Link
+                  href="/hours"
+                  className={`text-sm py-2 transition-colors ${
+                    pathname === '/hours' ? 'text-white' : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  じかん
+                </Link>
+              </>
             )}
           </nav>
         </div>
