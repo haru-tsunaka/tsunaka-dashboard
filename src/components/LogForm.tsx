@@ -143,7 +143,7 @@ export default function LogForm({
           name="title"
           required
           defaultValue={defaultTitle || ''}
-          placeholder="ロケ撮影完了"
+          placeholder="打ち合わせ、編集作業など"
           className="form-input"
         />
       </div>
