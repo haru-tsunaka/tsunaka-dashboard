@@ -106,9 +106,10 @@ export default function LogForm({
       {/* 時間 */}
       <div>
         <label className="block text-xs text-brand-muted mb-1.5">時間</label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
+          {/* 開始 */}
           <div>
-            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <div className="flex items-center gap-1.5 mb-1">
               <span className="text-[10px] text-brand-muted">開始</span>
               <button
                 type="button"
@@ -159,6 +160,7 @@ export default function LogForm({
               </div>
             )}
           </div>
+          {/* 終了 */}
           <div>
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-[10px] text-brand-muted">終了</span>
