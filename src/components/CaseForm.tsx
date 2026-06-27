@@ -261,9 +261,9 @@ function HoursInput({
             onChange?.(v === '' ? '' : Number(v));
           }}
           placeholder="0"
-          className="form-input pr-8 text-right"
+          className="form-input pr-10 text-right"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none">h</span>
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none">h</span>
       </div>
     </div>
   );
