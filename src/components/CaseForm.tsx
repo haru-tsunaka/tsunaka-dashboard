@@ -79,9 +79,7 @@ export default function CaseForm({
       (Number(estPlanning) || 0) +
       (Number(estShooting) || 0) +
       (Number(estEditing) || 0);
-    if (total > 0) {
-      setQuotedAmount(total * HOURLY_RATE);
-    }
+    setQuotedAmount(total > 0 ? total * HOURLY_RATE : 0);
   }, [estHearing, estPlanning, estShooting, estEditing, manualOverride]);
 
   const totalEst =
@@ -263,9 +261,9 @@ function HoursInput({
             onChange?.(v === '' ? '' : Number(v));
           }}
           placeholder="0"
-          className="form-input pr-6 text-right"
+          className="form-input pr-8 text-right"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted">h</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none">h</span>
       </div>
     </div>
   );
