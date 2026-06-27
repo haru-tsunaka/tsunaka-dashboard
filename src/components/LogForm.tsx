@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Case } from '@/lib/types';
 import { WORK_PHASES } from '@/lib/types';
 import { formatHoursJa } from '@/lib/formatting';
 import SubmitButton from './SubmitButton';
+
+const STORAGE_KEY = 'hitoha_start_time';
 
 function nowJST() {
   const d = new Date();
@@ -45,10 +47,38 @@ export default function LogForm({
 }) {
   const [startedAt, setStartedAt] = useState('');
   const [endedAt, setEndedAt] = useState('');
+  const [saved, setSaved] = useState(false);
   const hours = calcHours(startedAt, endedAt);
 
+  // ページ読み込み時にlocalStorageから開始時間を復元
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      setStartedAt(stored);
+      setSaved(true);
+    }
+  }, []);
+
+  // 開始時間を記憶する
+  function saveStartTime(time: string) {
+    setStartedAt(time);
+    localStorage.setItem(STORAGE_KEY, time);
+    setSaved(true);
+  }
+
+  // 記憶をクリア
+  function clearSavedTime() {
+    localStorage.removeItem(STORAGE_KEY);
+    setSaved(false);
+  }
+
   return (
-    <form action={action} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
+    <form action={async (formData) => {
+      await action(formData);
+      clearSavedTime();
+      setStartedAt('');
+      setEndedAt('');
+    }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
       {/* 案件 */}
       <div>
         <label className="block text-xs text-brand-muted mb-1.5">おもい</label>
@@ -78,8 +108,15 @@ export default function LogForm({
         <label className="block text-xs text-brand-muted mb-1.5">時間</label>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
               <span className="text-[10px] text-brand-muted">開始</span>
+              <button
+                type="button"
+                onClick={() => saveStartTime(nowJST())}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-navy/10 text-navy font-medium hover:bg-navy/20 transition-colors"
+              >
+                いま
+              </button>
               <button
                 type="button"
                 onClick={() => setStartedAt(minutesAgo(60))}
@@ -109,6 +146,18 @@ export default function LogForm({
               onChange={(e) => setStartedAt(e.target.value)}
               className="form-input text-sm"
             />
+            {saved && (
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-[10px] text-navy font-medium">開始時間を記憶中</span>
+                <button
+                  type="button"
+                  onClick={() => { clearSavedTime(); setStartedAt(''); }}
+                  className="text-[10px] text-brand-muted hover:text-red-500 transition-colors"
+                >
+                  クリア
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <div className="flex items-center gap-1.5 mb-1">
