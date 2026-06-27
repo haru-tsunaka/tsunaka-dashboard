@@ -262,9 +262,9 @@ function HoursInput({
           }}
           placeholder="0"
           className="form-input text-right"
-          style={{ paddingRight: '1.75rem' }}
+          style={{ paddingRight: '1.4rem' }}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none">h</span>
+        <span className="absolute top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none" style={{ right: '0.5rem' }}>h</span>
       </div>
     </div>
   );
