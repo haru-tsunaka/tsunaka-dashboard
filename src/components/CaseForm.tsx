@@ -249,7 +249,7 @@ function HoursInput({
   return (
     <div>
       <label className="block text-xs text-brand-muted mb-1">{label}</label>
-      <div className="relative">
+      <div className="flex items-center gap-1.5">
         <input
           type="text"
           inputMode="decimal"
@@ -261,9 +261,9 @@ function HoursInput({
             onChange?.(v === '' ? '' : Number(v));
           }}
           placeholder="0"
-          className="form-input pr-10 text-right"
+          className="form-input text-right flex-1"
         />
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-brand-muted pointer-events-none">h</span>
+        <span className="text-xs text-brand-muted shrink-0">h</span>
       </div>
     </div>
   );
