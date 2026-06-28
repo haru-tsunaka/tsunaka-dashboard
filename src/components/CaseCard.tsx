@@ -46,6 +46,7 @@ export default function CaseCard({ c, showFinancials = true }: { c: Case; showFi
             )}
             {showFinancials && (c.payment_amount ?? c.quoted_amount) !== null && (
               <span className="flex items-center gap-1">
+                <span className="text-brand-muted/60">{c.payment_amount !== null ? '入金' : '見積'}</span>
                 {formatYen(c.payment_amount ?? c.quoted_amount)}
                 <span className={`w-1.5 h-1.5 rounded-full ${PAYMENT_COLORS[c.payment_status]}`} />
               </span>
