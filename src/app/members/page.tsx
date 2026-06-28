@@ -207,7 +207,7 @@ export default async function MembersPage() {
       {/* 拒否済み・外したユーザー */}
       {rejectedProfiles.length > 0 && (
         <div className="rounded-lg border border-brand-border/50 p-6">
-          <SectionLabel label="拒否・除外" />
+          <SectionLabel label="未承認" />
           <div className="space-y-3">
             {rejectedProfiles.map((p) => (
               <div key={p.id} className="flex items-center justify-between py-2 border-b border-brand-border/50 last:border-0">
