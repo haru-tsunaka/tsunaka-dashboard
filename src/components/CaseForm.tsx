@@ -46,10 +46,6 @@ const defaultData: CaseFormData = {
   est_hours_planning: null,
   est_hours_shooting: null,
   est_hours_editing: null,
-  actual_hours_meeting: null,
-  actual_hours_planning: null,
-  actual_hours_shooting: null,
-  actual_hours_editing: null,
 };
 
 export default function CaseForm({

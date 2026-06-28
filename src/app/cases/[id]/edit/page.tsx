@@ -56,10 +56,6 @@ export default async function EditCasePage({
         est_hours_planning: numOrNull(formData, 'est_hours_planning'),
         est_hours_shooting: numOrNull(formData, 'est_hours_shooting'),
         est_hours_editing: numOrNull(formData, 'est_hours_editing'),
-        actual_hours_meeting: numOrNull(formData, 'actual_hours_meeting'),
-        actual_hours_planning: numOrNull(formData, 'actual_hours_planning'),
-        actual_hours_shooting: numOrNull(formData, 'actual_hours_shooting'),
-        actual_hours_editing: numOrNull(formData, 'actual_hours_editing'),
       })
       .eq('id', id);
 
