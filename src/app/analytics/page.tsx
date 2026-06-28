@@ -182,6 +182,14 @@ export default async function AnalyticsPage({
       )
     : null;
 
+  // ペースライン（今日時点での理想進捗）
+  const dayOfYear = Math.floor((now.getTime() - new Date(currentYear, 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const daysInYear = (currentYear % 4 === 0 && (currentYear % 100 !== 0 || currentYear % 400 === 0)) ? 366 : 365;
+  const yearPacePct = Math.round((dayOfYear / daysInYear) * 100);
+
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const monthPacePct = Math.round((now.getDate() / daysInMonth) * 100);
+
   // 目標設定アクション
   async function setTarget(formData: FormData) {
     'use server';
@@ -250,13 +258,25 @@ export default async function AnalyticsPage({
                   {formatYen(annualRevenue)} / {formatYen(annualTarget)}
                 </span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-4">
+              <div className="relative w-full bg-gray-100 rounded-full h-4">
                 <div
                   className="bg-navy rounded-full h-4 transition-all duration-500"
                   style={{ width: `${annualProgress}%` }}
                 />
+                {isCurrentYear && annualTarget > 0 && (
+                  <div
+                    className="absolute top-0 h-4 w-0.5 bg-gold"
+                    style={{ left: `${yearPacePct}%` }}
+                    title={`目安: ${yearPacePct}%`}
+                  />
+                )}
               </div>
-              <p className="text-right text-xs text-brand-muted mt-1">達成率 {Math.round(annualProgress)}%</p>
+              <div className="flex items-center justify-between mt-1">
+                {isCurrentYear && annualTarget > 0 ? (
+                  <p className="text-[10px] text-gold">目安 {yearPacePct}%</p>
+                ) : <span />}
+                <p className="text-xs text-brand-muted">達成率 {Math.round(annualProgress)}%</p>
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-4 mt-4">
               <StatCard label="売上" value={formatYen(annualRevenue)} />
@@ -286,15 +306,22 @@ export default async function AnalyticsPage({
                 {formatYen(monthlyRevenue)} / {formatYen(monthlyTarget)}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-4">
+            <div className="relative w-full bg-gray-100 rounded-full h-4">
               <div
                 className="bg-gold rounded-full h-4 transition-all duration-500"
                 style={{ width: `${monthlyProgress}%` }}
               />
+              <div
+                className="absolute top-0 h-4 w-0.5 bg-navy"
+                style={{ left: `${monthPacePct}%` }}
+              />
             </div>
-            <p className="text-right text-xs text-brand-muted mt-1">
-              あと {formatYen(Math.max(monthlyTarget - monthlyRevenue, 0))}
-            </p>
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-[10px] text-navy">目安 {monthPacePct}%</p>
+              <p className="text-xs text-brand-muted">
+                あと {formatYen(Math.max(monthlyTarget - monthlyRevenue, 0))}
+              </p>
+            </div>
           </div>
         </div>
       )}
