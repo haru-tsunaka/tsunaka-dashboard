@@ -10,7 +10,6 @@ export default async function HoursPage() {
   await requireOwner();
   const supabase = await createClient();
 
-  // 全案件取得
   const { data: cases } = await supabase
     .from('cases')
     .select('*')
@@ -18,7 +17,6 @@ export default async function HoursPage() {
 
   const allCases = (cases || []) as Case[];
 
-  // 全進捗ログ取得（取消除外）
   const { data: logs } = await supabase
     .from('progress_logs')
     .select('*')
@@ -27,7 +25,7 @@ export default async function HoursPage() {
 
   const allLogs = (logs || []) as ProgressLog[];
 
-  // --- 全体集計 ---
+  // --- 工程別集計 ---
   const totalActualByPhase: Record<string, number> = {};
   let totalActualHours = 0;
 
@@ -39,12 +37,44 @@ export default async function HoursPage() {
     }
   });
 
+  // --- 交通費集計 ---
+  const totalExpense = allLogs.reduce((sum, log) => sum + (Number(log.expense_amount) || 0), 0);
+
+  // --- 案件別の実績 ---
+  const caseHours = allCases
+    .map((c) => {
+      const caseLogs = allLogs.filter((l) => l.case_id === c.id);
+      const total = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
+      const expense = caseLogs.reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
+      return { case: c, total, expense };
+    })
+    .filter((ch) => ch.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  // --- 案件あたり平均工数 ---
+  const avgHoursPerCase = caseHours.length > 0
+    ? caseHours.reduce((sum, ch) => sum + ch.total, 0) / caseHours.length
+    : 0;
+
+  // --- 実効時給 ---
+  const paidCasesWithHours = caseHours.filter((ch) => ch.case.payment_status === '入金済み' && ch.case.payment_amount);
+  const totalPaidRevenue = paidCasesWithHours.reduce((sum, ch) => sum + (ch.case.payment_amount || 0), 0);
+  const totalPaidHours = paidCasesWithHours.reduce((sum, ch) => sum + ch.total, 0);
+  const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
+
+  // --- 案件別時給ランキング ---
+  const caseHourlyRanking = paidCasesWithHours
+    .map((ch) => ({
+      ...ch,
+      hourlyRate: (ch.case.payment_amount || 0) / ch.total,
+    }))
+    .sort((a, b) => b.hourlyRate - a.hourlyRate);
+
   // --- 見積もり精度 ---
   const casesWithBoth = allCases.filter((c) => {
     const estTotal = (Number(c.est_hours_meeting) || 0) + (Number(c.est_hours_planning) || 0) +
       (Number(c.est_hours_shooting) || 0) + (Number(c.est_hours_editing) || 0);
     if (estTotal === 0) return false;
-    // この案件に実績ログがあるか
     return allLogs.some((l) => l.case_id === c.id && Number(l.hours) > 0);
   });
 
@@ -63,7 +93,6 @@ export default async function HoursPage() {
     ? estimateAccuracy.reduce((sum, a) => sum + a.actTotal, 0) / estimateAccuracy.length
     : 0;
 
-  // --- 工程別の見積もり精度 ---
   const phaseKeys = ['meeting', 'planning', 'shooting', 'editing'] as const;
   const estFieldMap = {
     meeting: 'est_hours_meeting',
@@ -97,27 +126,6 @@ export default async function HoursPage() {
     };
   });
 
-  // --- 案件別の実績 ---
-  const caseHours = allCases
-    .map((c) => {
-      const caseLogs = allLogs.filter((l) => l.case_id === c.id);
-      const total = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
-      return { case: c, total };
-    })
-    .filter((ch) => ch.total > 0)
-    .sort((a, b) => b.total - a.total);
-
-  // --- 実効時給 ---
-  const paidCasesWithHours = caseHours.filter((ch) => ch.case.payment_status === '入金済み' && ch.case.payment_amount);
-  const totalPaidRevenue = paidCasesWithHours.reduce((sum, ch) => sum + (ch.case.payment_amount || 0), 0);
-  const totalPaidHours = paidCasesWithHours.reduce((sum, ch) => sum + ch.total, 0);
-  const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
-
-  // --- 案件あたり平均工数 ---
-  const avgHoursPerCase = caseHours.length > 0
-    ? caseHours.reduce((sum, ch) => sum + ch.total, 0) / caseHours.length
-    : 0;
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
@@ -134,10 +142,10 @@ export default async function HoursPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* 全体 */}
+          {/* じかん */}
           <div className="bg-white rounded-lg border border-brand-border p-6">
-            <SectionLabel label="全体" />
-            <div className="grid grid-cols-3 gap-4">
+            <SectionLabel label="じかん" />
+            <div className="grid grid-cols-2 gap-4 mb-5">
               <div className="text-center">
                 <p className="text-xs text-brand-muted mb-1">総稼働時間</p>
                 <p className="text-2xl font-bold text-navy">{formatHoursH(totalActualHours)}</p>
@@ -146,19 +154,7 @@ export default async function HoursPage() {
                 <p className="text-xs text-brand-muted mb-1">平均工数/おもい</p>
                 <p className="text-2xl font-bold text-navy">{avgHoursPerCase > 0 ? formatHoursH(avgHoursPerCase) : '-'}</p>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-brand-muted mb-1">実効時給</p>
-                <p className="text-2xl font-bold text-navy">{effectiveHourlyRate > 0 ? formatYen(effectiveHourlyRate) : '-'}</p>
-                {effectiveHourlyRate > 0 && (
-                  <p className="text-[10px] text-brand-muted mt-0.5">目安: {formatYen(HOURLY_RATE)}</p>
-                )}
-              </div>
             </div>
-          </div>
-
-          {/* 工程別内訳 */}
-          <div className="bg-white rounded-lg border border-brand-border p-6">
-            <SectionLabel label="工程別" />
             <div className="space-y-3">
               {Object.entries(totalActualByPhase)
                 .sort(([, a], [, b]) => b - a)
@@ -179,6 +175,59 @@ export default async function HoursPage() {
             </div>
           </div>
 
+          {/* お金 */}
+          <div className="bg-white rounded-lg border border-brand-border p-6">
+            <SectionLabel label="お金" />
+            <div className={`grid ${totalExpense > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mb-5`}>
+              <div className="text-center">
+                <p className="text-xs text-brand-muted mb-1">実効時給</p>
+                <p className="text-2xl font-bold text-navy">{effectiveHourlyRate > 0 ? formatYen(effectiveHourlyRate) : '-'}</p>
+                {effectiveHourlyRate > 0 && (
+                  <p className="text-[10px] text-brand-muted mt-0.5">目安: {formatYen(HOURLY_RATE)}</p>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-brand-muted mb-1">売上合計</p>
+                <p className="text-2xl font-bold text-navy">{totalPaidRevenue > 0 ? formatYen(totalPaidRevenue) : '-'}</p>
+                {paidCasesWithHours.length > 0 && (
+                  <p className="text-[10px] text-brand-muted mt-0.5">{paidCasesWithHours.length}件の入金済み</p>
+                )}
+              </div>
+              {totalExpense > 0 && (
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">交通費合計</p>
+                  <p className="text-2xl font-bold text-navy">{formatYen(totalExpense)}</p>
+                </div>
+              )}
+            </div>
+
+            {/* 案件別時給ランキング */}
+            {caseHourlyRanking.length > 0 && (
+              <div className="border-t border-brand-border/50 pt-4">
+                <p className="text-xs text-brand-muted mb-3">おもい別の時給</p>
+                <div className="space-y-2">
+                  {caseHourlyRanking.map((ch) => (
+                    <Link
+                      key={ch.case.id}
+                      href={`/cases/${ch.case.id}`}
+                      className="flex items-center justify-between py-1.5 hover:bg-brand-bg transition-colors -mx-2 px-2 rounded"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm truncate">{ch.case.name}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-4">
+                        <span className="text-xs text-brand-muted">{formatHoursH(ch.total)}</span>
+                        <span className={`text-sm font-bold ${ch.hourlyRate >= HOURLY_RATE ? 'text-green-600' : 'text-red-500'}`}>
+                          {formatYen(ch.hourlyRate)}/h
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 見積もり精度 */}
           {estimateAccuracy.length > 0 && (
             <div className="bg-white rounded-lg border border-brand-border p-6">
@@ -192,7 +241,7 @@ export default async function HoursPage() {
 
                 <span className="font-medium">平均</span>
                 <span className="text-right tabular-nums font-bold text-navy">{formatHoursH(avgEstimate)}</span>
-                <span className="text-brand-muted">→</span>
+                <span className="text-brand-muted">&rarr;</span>
                 <span className="text-right tabular-nums font-bold text-navy">{formatHoursH(avgActual)}</span>
                 <span className={`text-right tabular-nums font-bold ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
                   {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursH(Math.abs(avgActual - avgEstimate))}
@@ -203,7 +252,7 @@ export default async function HoursPage() {
                   <React.Fragment key={p.phase}>
                     <span>{p.label}</span>
                     <span className="text-brand-muted text-right tabular-nums">{formatHoursH(p.avgEst)}</span>
-                    <span className="text-brand-muted">→</span>
+                    <span className="text-brand-muted">&rarr;</span>
                     <span className="font-medium text-right tabular-nums">{formatHoursH(p.avgAct)}</span>
                     <span className={`text-right tabular-nums ${p.diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
                       {p.diff > 0 ? '+' : ''}{formatHoursH(Math.abs(p.diff))}
@@ -214,7 +263,7 @@ export default async function HoursPage() {
             </div>
           )}
 
-          {/* 案件別 */}
+          {/* おもい別 */}
           <div className="bg-white rounded-lg border border-brand-border p-6">
             <SectionLabel label="おもい別" />
             <div className="space-y-2">
@@ -228,7 +277,12 @@ export default async function HoursPage() {
                     <p className="text-sm font-medium truncate">{ch.case.name}</p>
                     {ch.case.client_name && <p className="text-xs text-brand-muted">{ch.case.client_name}</p>}
                   </div>
-                  <span className="text-sm font-bold text-navy shrink-0 ml-4">{formatHoursH(ch.total)}</span>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    <span className="text-sm font-bold text-navy">{formatHoursH(ch.total)}</span>
+                    {ch.expense > 0 && (
+                      <span className="text-xs text-brand-muted">{formatYen(ch.expense)}</span>
+                    )}
+                  </div>
                 </Link>
               ))}
             </div>
