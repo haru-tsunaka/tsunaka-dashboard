@@ -265,7 +265,7 @@ export default async function AnalyticsPage({
                 />
                 {isCurrentYear && annualTarget > 0 && (
                   <div
-                    className="absolute top-0 h-4 w-0.5 bg-gold"
+                    className="absolute top-0 h-4 w-0.5 bg-red-400"
                     style={{ left: `${yearPacePct}%` }}
                     title={`目安: ${yearPacePct}%`}
                   />
@@ -273,7 +273,7 @@ export default async function AnalyticsPage({
               </div>
               <div className="flex items-center justify-between mt-1">
                 {isCurrentYear && annualTarget > 0 ? (
-                  <p className="text-[10px] text-gold">目安 {yearPacePct}%</p>
+                  <p className="text-[10px] text-red-400">目安 {yearPacePct}%</p>
                 ) : <span />}
                 <p className="text-xs text-brand-muted">達成率 {Math.round(annualProgress)}%</p>
               </div>
@@ -312,12 +312,12 @@ export default async function AnalyticsPage({
                 style={{ width: `${monthlyProgress}%` }}
               />
               <div
-                className="absolute top-0 h-4 w-0.5 bg-navy"
+                className="absolute top-0 h-4 w-0.5 bg-red-400"
                 style={{ left: `${monthPacePct}%` }}
               />
             </div>
             <div className="flex items-center justify-between mt-1">
-              <p className="text-[10px] text-navy">目安 {monthPacePct}%</p>
+              <p className="text-[10px] text-red-400">目安 {monthPacePct}%</p>
               <p className="text-xs text-brand-muted">
                 あと {formatYen(Math.max(monthlyTarget - monthlyRevenue, 0))}
               </p>
