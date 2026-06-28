@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
 import LogForm from '@/components/LogForm';
@@ -80,8 +81,13 @@ export default async function LogPage({
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 md:py-8 pb-12">
-      <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6">きろく</h1>
+    <div className="max-w-2xl mx-auto px-4 py-8 pb-12">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="font-serif text-navy text-2xl font-bold">きろく</h1>
+        <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors">
+          おもいへ &rarr;
+        </Link>
+      </div>
 
       <LogForm
         cases={(cases || []) as Case[]}
