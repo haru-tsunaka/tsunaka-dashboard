@@ -127,7 +127,7 @@ export default async function MembersPage() {
                       <select
                         name="role"
                         defaultValue={p.role}
-                        className="text-xs border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy flex-1"
+                        className="text-base border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy flex-1"
                       >
                         <option value="staff">スタッフ</option>
                         <option value="manager">マネージャー</option>
