@@ -78,7 +78,7 @@ export default function LogForm({
       clearSavedTime();
       setStartedAt('');
       setEndedAt('');
-    }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
+    }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4 overflow-hidden">
       {/* 案件 */}
       <div>
         <label className="block text-xs text-brand-muted mb-1.5">おもい</label>
@@ -145,7 +145,7 @@ export default function LogForm({
               name="started_at"
               value={startedAt}
               onChange={(e) => setStartedAt(e.target.value)}
-              className="form-input text-sm"
+              className="form-input text-sm w-full min-w-0"
             />
             {saved && (
               <div className="flex items-center justify-between mt-1">
@@ -177,7 +177,7 @@ export default function LogForm({
               name="ended_at"
               value={endedAt}
               onChange={(e) => setEndedAt(e.target.value)}
-              className="form-input text-sm"
+              className="form-input text-sm w-full min-w-0"
             />
           </div>
         </div>
