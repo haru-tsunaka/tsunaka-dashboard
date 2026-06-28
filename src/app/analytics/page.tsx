@@ -420,24 +420,7 @@ export default async function AnalyticsPage({
         </div>
       </div>
 
-      {/* カテゴリ別 */}
-      {categoryMap.size > 0 && (
-        <div className="bg-white rounded-lg border border-brand-border p-6">
-          <SectionLabel label="カテゴリ別売上" />
-          <div className="space-y-3">
-            {Array.from(categoryMap.entries()).map(([cat, data]) => (
-              <div key={cat} className="flex items-center justify-between">
-                <span className="text-sm">{cat}</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-brand-muted">{data.count}件</span>
-                  <span className="text-sm font-medium">{formatYen(data.revenue)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* お金（実効時給・交通費・おもい別時給） */}
+      {/* お金（実効時給・交通費・カテゴリ別・おもい別時給） */}
       <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
         <SectionLabel label="お金" />
         <div className={`grid ${totalExpense > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mb-5`}>
@@ -483,6 +466,23 @@ export default async function AnalyticsPage({
                     </span>
                   </div>
                 </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {categoryMap.size > 0 && (
+          <div className="border-t border-brand-border/50 pt-4">
+            <p className="text-xs text-brand-muted mb-3">カテゴリ別売上</p>
+            <div className="space-y-2">
+              {Array.from(categoryMap.entries()).map(([cat, data]) => (
+                <div key={cat} className="flex items-center justify-between py-1">
+                  <span className="text-sm">{cat}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-brand-muted">{data.count}件</span>
+                    <span className="text-sm font-medium">{formatYen(data.revenue)}</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
