@@ -34,11 +34,9 @@ update public.profiles p
   from auth.users u
   where p.id = u.id and p.role = 'owner';
 
--- role のデフォルトを staff に変更
-alter table public.profiles alter column role set default 'staff';
-
--- 既存の member を staff に変更
-update public.profiles set role = 'staff' where role = 'member';
+-- role のデフォルトは member のまま（ダイヤリー専用ユーザー）
+-- ダッシュボードに招待する場合は owner が手動で staff 以上に変更する
+-- alter table public.profiles alter column role set default 'member';
 
 -- ============================================================
 -- 3. profiles の RLS ポリシー書き換え
@@ -148,7 +146,7 @@ language plpgsql security definer
 as $$
 begin
   insert into public.profiles (id, role, status, email)
-  values (new.id, 'staff', 'pending', new.email);
+  values (new.id, 'member', 'pending', new.email);
   return new;
 end;
 $$;
