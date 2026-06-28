@@ -133,9 +133,6 @@ export default async function AnalyticsPage({
     delivered: allCases.filter((c) => c.status === '納品済み'),
   };
 
-  const pipelineValue = (cases: Case[]) =>
-    cases.reduce((sum, c) => sum + (c.quoted_amount || 0), 0);
-
   // カテゴリ別集計（入金済みのみ）
   const paidCases = yearCases.filter((c) => c.payment_status === '入金済み' && c.payment_amount);
   const categoryMap = new Map<string, { revenue: number; count: number }>();
@@ -350,10 +347,10 @@ export default async function AnalyticsPage({
         <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
           <SectionLabel label="パイプライン" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <PipelineCard label="商談中" count={pipeline.negotiating.length} value={pipelineValue(pipeline.negotiating)} />
-            <PipelineCard label="準備中" count={pipeline.preparing.length} value={pipelineValue(pipeline.preparing)} />
-            <PipelineCard label="進行中" count={pipeline.inProgress.length} value={pipelineValue(pipeline.inProgress)} />
-            <PipelineCard label="納品済み" count={pipeline.delivered.length} value={pipelineValue(pipeline.delivered)} />
+            <PipelineCard label="商談中" count={pipeline.negotiating.length} />
+            <PipelineCard label="準備中" count={pipeline.preparing.length} />
+            <PipelineCard label="進行中" count={pipeline.inProgress.length} />
+            <PipelineCard label="納品済み" count={pipeline.delivered.length} />
           </div>
         </div>
       )}
@@ -513,12 +510,11 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PipelineCard({ label, count, value }: { label: string; count: number; value: number }) {
+function PipelineCard({ label, count }: { label: string; count: number }) {
   return (
     <div className="bg-brand-bg rounded-lg p-4 text-center">
       <p className="text-xs text-brand-muted mb-1">{label}</p>
       <p className="text-lg font-bold text-navy">{count}<span className="text-xs font-normal text-brand-muted ml-0.5">件</span></p>
-      <p className="text-xs text-brand-muted mt-1">{formatYen(value)}</p>
     </div>
   );
 }
