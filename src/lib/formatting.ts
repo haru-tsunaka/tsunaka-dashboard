@@ -56,16 +56,18 @@ export function formatDateTime(date: string | null, fallback = ''): string {
   return `${dateStr} ${h}:${String(m).padStart(2, '0')}`;
 }
 
-/** 日時表示（年付き、ローカルタイム） */
+/** 日時表示（年付き、JST） */
 export function formatDateTimeFull(date: string): string {
   const d = new Date(date);
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return `${jst.getUTCFullYear()}/${jst.getUTCMonth() + 1}/${jst.getUTCDate()} ${jst.getUTCHours()}:${String(jst.getUTCMinutes()).padStart(2, '0')}`;
 }
 
-/** 時刻のみ表示 */
+/** 時刻のみ表示（JST） */
 export function formatTime(date: string): string {
   const d = new Date(date);
-  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return `${jst.getUTCHours()}:${String(jst.getUTCMinutes()).padStart(2, '0')}`;
 }
 
 /** 金額表示（"¥54,000"） */
