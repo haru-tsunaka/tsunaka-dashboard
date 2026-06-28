@@ -85,7 +85,7 @@ export default function Header() {
                     pathname === '/members' ? 'text-white' : 'text-white/50 hover:text-white/80'
                   }`}
                 >
-                  メンバー
+                  なかま
                 </Link>
               </>
             )}

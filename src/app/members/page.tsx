@@ -68,7 +68,7 @@ export default async function MembersPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-serif text-navy text-2xl font-bold">メンバー管理</h1>
+        <h1 className="font-serif text-navy text-2xl font-bold">なかま</h1>
         <Link href="/" className="text-brand-muted text-sm hover:text-navy transition-colors">
           おもいへ &rarr;
         </Link>
@@ -107,9 +107,9 @@ export default async function MembersPage() {
 
       {/* 承認済み */}
       <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
-        <SectionLabel label="メンバー" />
+        <SectionLabel label="なかま" />
         {approvedProfiles.length === 0 ? (
-          <p className="text-sm text-brand-muted">まだメンバーがいません</p>
+          <p className="text-sm text-brand-muted">まだなかまがいません</p>
         ) : (
           <div className="space-y-3">
             {approvedProfiles.map((p) => (
