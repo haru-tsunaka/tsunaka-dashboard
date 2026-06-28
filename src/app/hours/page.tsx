@@ -1,9 +1,8 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
-import { HOURLY_RATE } from '@/lib/constants';
 import Link from 'next/link';
-import { formatYen, formatHoursH, phaseLabel } from '@/lib/formatting';
+import { formatHoursH, phaseLabel } from '@/lib/formatting';
 import { requireOwner } from '@/lib/auth';
 
 export default async function HoursPage() {
@@ -37,16 +36,12 @@ export default async function HoursPage() {
     }
   });
 
-  // --- 交通費集計 ---
-  const totalExpense = allLogs.reduce((sum, log) => sum + (Number(log.expense_amount) || 0), 0);
-
   // --- 案件別の実績 ---
   const caseHours = allCases
     .map((c) => {
       const caseLogs = allLogs.filter((l) => l.case_id === c.id);
       const total = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
-      const expense = caseLogs.reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
-      return { case: c, total, expense };
+      return { case: c, total };
     })
     .filter((ch) => ch.total > 0)
     .sort((a, b) => b.total - a.total);
@@ -55,20 +50,6 @@ export default async function HoursPage() {
   const avgHoursPerCase = caseHours.length > 0
     ? caseHours.reduce((sum, ch) => sum + ch.total, 0) / caseHours.length
     : 0;
-
-  // --- 実効時給 ---
-  const paidCasesWithHours = caseHours.filter((ch) => ch.case.payment_status === '入金済み' && ch.case.payment_amount);
-  const totalPaidRevenue = paidCasesWithHours.reduce((sum, ch) => sum + (ch.case.payment_amount || 0), 0);
-  const totalPaidHours = paidCasesWithHours.reduce((sum, ch) => sum + ch.total, 0);
-  const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
-
-  // --- 案件別時給ランキング ---
-  const caseHourlyRanking = paidCasesWithHours
-    .map((ch) => ({
-      ...ch,
-      hourlyRate: (ch.case.payment_amount || 0) / ch.total,
-    }))
-    .sort((a, b) => b.hourlyRate - a.hourlyRate);
 
   // --- 見積もり精度 ---
   const casesWithBoth = allCases.filter((c) => {
@@ -144,7 +125,7 @@ export default async function HoursPage() {
         <div className="space-y-6">
           {/* じかん */}
           <div className="bg-white rounded-lg border border-brand-border p-6">
-            <SectionLabel label="じかん" />
+            <SectionLabel label="全体" />
             <div className="grid grid-cols-2 gap-4 mb-5">
               <div className="text-center">
                 <p className="text-xs text-brand-muted mb-1">総稼働時間</p>
@@ -173,59 +154,6 @@ export default async function HoursPage() {
                   );
                 })}
             </div>
-          </div>
-
-          {/* お金 */}
-          <div className="bg-white rounded-lg border border-brand-border p-6">
-            <SectionLabel label="お金" />
-            <div className={`grid ${totalExpense > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mb-5`}>
-              <div className="text-center">
-                <p className="text-xs text-brand-muted mb-1">実効時給</p>
-                <p className="text-2xl font-bold text-navy">{effectiveHourlyRate > 0 ? formatYen(effectiveHourlyRate) : '-'}</p>
-                {effectiveHourlyRate > 0 && (
-                  <p className="text-[10px] text-brand-muted mt-0.5">目安: {formatYen(HOURLY_RATE)}</p>
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-brand-muted mb-1">売上合計</p>
-                <p className="text-2xl font-bold text-navy">{totalPaidRevenue > 0 ? formatYen(totalPaidRevenue) : '-'}</p>
-                {paidCasesWithHours.length > 0 && (
-                  <p className="text-[10px] text-brand-muted mt-0.5">{paidCasesWithHours.length}件の入金済み</p>
-                )}
-              </div>
-              {totalExpense > 0 && (
-                <div className="text-center">
-                  <p className="text-xs text-brand-muted mb-1">交通費合計</p>
-                  <p className="text-2xl font-bold text-navy">{formatYen(totalExpense)}</p>
-                </div>
-              )}
-            </div>
-
-            {/* 案件別時給ランキング */}
-            {caseHourlyRanking.length > 0 && (
-              <div className="border-t border-brand-border/50 pt-4">
-                <p className="text-xs text-brand-muted mb-3">おもい別の時給</p>
-                <div className="space-y-2">
-                  {caseHourlyRanking.map((ch) => (
-                    <Link
-                      key={ch.case.id}
-                      href={`/cases/${ch.case.id}`}
-                      className="flex items-center justify-between py-1.5 hover:bg-brand-bg transition-colors -mx-2 px-2 rounded"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm truncate">{ch.case.name}</p>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 ml-4">
-                        <span className="text-xs text-brand-muted">{formatHoursH(ch.total)}</span>
-                        <span className={`text-sm font-bold ${ch.hourlyRate >= HOURLY_RATE ? 'text-green-600' : 'text-red-500'}`}>
-                          {formatYen(ch.hourlyRate)}/h
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* 見積もり精度 */}
@@ -277,12 +205,7 @@ export default async function HoursPage() {
                     <p className="text-sm font-medium truncate">{ch.case.name}</p>
                     {ch.case.client_name && <p className="text-xs text-brand-muted">{ch.case.client_name}</p>}
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-sm font-bold text-navy">{formatHoursH(ch.total)}</span>
-                    {ch.expense > 0 && (
-                      <span className="text-xs text-brand-muted">{formatYen(ch.expense)}</span>
-                    )}
-                  </div>
+                  <span className="text-sm font-bold text-navy shrink-0 ml-4">{formatHoursH(ch.total)}</span>
                 </Link>
               ))}
             </div>

@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Case } from '@/lib/types';
+import type { Case, ProgressLog } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
-import { formatYen } from '@/lib/formatting';
+import { formatYen, formatHoursH } from '@/lib/formatting';
+import { HOURLY_RATE } from '@/lib/constants';
 import { requireOwner } from '@/lib/auth';
 
 function getMonthKey(date: string) {
@@ -32,6 +33,37 @@ export default async function AnalyticsPage({
     .order('created_at', { ascending: true });
 
   const allCases = (cases || []) as Case[];
+
+  // 進捗ログ取得（取消除外）
+  const { data: logs } = await supabase
+    .from('progress_logs')
+    .select('*')
+    .eq('is_cancelled', false);
+
+  const allLogs = (logs || []) as ProgressLog[];
+
+  // --- 実効時給・交通費 ---
+  const caseHoursMap = new Map<string, { total: number; expense: number }>();
+  allLogs.forEach((log) => {
+    const h = Number(log.hours) || 0;
+    const exp = Number(log.expense_amount) || 0;
+    const existing = caseHoursMap.get(log.case_id) || { total: 0, expense: 0 };
+    caseHoursMap.set(log.case_id, { total: existing.total + h, expense: existing.expense + exp });
+  });
+
+  const totalExpense = allLogs.reduce((sum, log) => sum + (Number(log.expense_amount) || 0), 0);
+
+  const paidWithHours = allCases
+    .filter((c) => c.payment_status === '入金済み' && c.payment_amount && caseHoursMap.has(c.id) && (caseHoursMap.get(c.id)?.total || 0) > 0)
+    .map((c) => {
+      const hours = caseHoursMap.get(c.id)!;
+      return { case: c, total: hours.total, expense: hours.expense, hourlyRate: (c.payment_amount || 0) / hours.total };
+    })
+    .sort((a, b) => b.hourlyRate - a.hourlyRate);
+
+  const totalPaidRevenue = paidWithHours.reduce((sum, ch) => sum + (ch.case.payment_amount || 0), 0);
+  const totalPaidHours = paidWithHours.reduce((sum, ch) => sum + ch.total, 0);
+  const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
 
   // 年度のリストを作成（データが存在する年 + 今年）
   const now = new Date();
@@ -408,6 +440,57 @@ export default async function AnalyticsPage({
           </div>
         </div>
       )}
+      {/* お金（実効時給・交通費・おもい別時給） */}
+      <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
+        <SectionLabel label="お金" />
+        <div className={`grid ${totalExpense > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mb-5`}>
+          <div className="text-center">
+            <p className="text-xs text-brand-muted mb-1">実効時給</p>
+            <p className="text-2xl font-bold text-navy">{effectiveHourlyRate > 0 ? formatYen(effectiveHourlyRate) : '-'}</p>
+            {effectiveHourlyRate > 0 && (
+              <p className="text-[10px] text-brand-muted mt-0.5">目安: {formatYen(HOURLY_RATE)}</p>
+            )}
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-brand-muted mb-1">売上合計</p>
+            <p className="text-2xl font-bold text-navy">{totalPaidRevenue > 0 ? formatYen(totalPaidRevenue) : '-'}</p>
+            {paidWithHours.length > 0 && (
+              <p className="text-[10px] text-brand-muted mt-0.5">{paidWithHours.length}件の入金済み</p>
+            )}
+          </div>
+          {totalExpense > 0 && (
+            <div className="text-center">
+              <p className="text-xs text-brand-muted mb-1">交通費合計</p>
+              <p className="text-2xl font-bold text-navy">{formatYen(totalExpense)}</p>
+            </div>
+          )}
+        </div>
+
+        {paidWithHours.length > 0 && (
+          <div className="border-t border-brand-border/50 pt-4">
+            <p className="text-xs text-brand-muted mb-3">おもい別の時給</p>
+            <div className="space-y-2">
+              {paidWithHours.map((ch) => (
+                <Link
+                  key={ch.case.id}
+                  href={`/cases/${ch.case.id}`}
+                  className="flex items-center justify-between py-1.5 hover:bg-brand-bg transition-colors -mx-2 px-2 rounded"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm truncate">{ch.case.name}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    <span className="text-xs text-brand-muted">{formatHoursH(ch.total)}</span>
+                    <span className={`text-sm font-bold ${ch.hourlyRate >= HOURLY_RATE ? 'text-green-600' : 'text-red-500'}`}>
+                      {formatYen(ch.hourlyRate)}/h
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
