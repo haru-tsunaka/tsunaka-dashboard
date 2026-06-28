@@ -59,15 +59,13 @@ export function formatDateTime(date: string | null, fallback = ''): string {
 /** 日時表示（年付き、JST） */
 export function formatDateTimeFull(date: string): string {
   const d = new Date(date);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  return `${jst.getUTCFullYear()}/${jst.getUTCMonth() + 1}/${jst.getUTCDate()} ${jst.getUTCHours()}:${String(jst.getUTCMinutes()).padStart(2, '0')}`;
+  return d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 /** 時刻のみ表示（JST） */
 export function formatTime(date: string): string {
   const d = new Date(date);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  return `${jst.getUTCHours()}:${String(jst.getUTCMinutes()).padStart(2, '0')}`;
+  return d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' });
 }
 
 /** 金額表示（"¥54,000"） */
