@@ -247,8 +247,9 @@ export default async function CaseDetailPage({
           const actPlanning = actualByPhase['planning'] || 0;
           const actShooting = actualByPhase['shooting'] || 0;
           const actEditing = actualByPhase['editing'] || 0;
+          const actTravel = actualByPhase['travel'] || 0;
           const actOther = actualByPhase['other'] || 0;
-          const actTotal = actMeeting + actPlanning + actShooting + actEditing + actOther;
+          const actTotal = actMeeting + actPlanning + actShooting + actEditing + actTravel + actOther;
 
           const estTotal = (c.est_hours_meeting || 0) + (c.est_hours_planning || 0) + (c.est_hours_shooting || 0) + (c.est_hours_editing || 0);
           const hasEst = estTotal > 0;
@@ -256,11 +257,12 @@ export default async function CaseDetailPage({
 
           return (
             <InfoSection label="実績工数">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <InfoItem label="打ち合わせ" value={actMeeting > 0 ? `${actMeeting}h` : '-'} />
                 <InfoItem label="企画・構成" value={actPlanning > 0 ? `${actPlanning}h` : '-'} />
                 <InfoItem label="撮影" value={actShooting > 0 ? `${actShooting}h` : '-'} />
                 <InfoItem label="編集〜納品" value={actEditing > 0 ? `${actEditing}h` : '-'} />
+                <InfoItem label="移動" value={actTravel > 0 ? `${actTravel}h` : '-'} />
               </div>
               <p className="text-xs text-brand-muted mt-2">
                 合計: <span className="font-bold text-navy">{actTotal}h</span>
