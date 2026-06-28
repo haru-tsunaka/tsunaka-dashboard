@@ -257,7 +257,7 @@ export default async function CaseDetailPage({
           return (
             <InfoSection label="実績工数">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <InfoItem label="ヒアリング" value={actHearing > 0 ? `${actHearing}h` : '-'} />
+                <InfoItem label="打ち合わせ" value={actHearing > 0 ? `${actHearing}h` : '-'} />
                 <InfoItem label="企画・構成" value={actPlanning > 0 ? `${actPlanning}h` : '-'} />
                 <InfoItem label="撮影" value={actShooting > 0 ? `${actShooting}h` : '-'} />
                 <InfoItem label="編集〜納品" value={actEditing > 0 ? `${actEditing}h` : '-'} />
@@ -369,7 +369,7 @@ function HoursRow({
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoItem label="ヒアリング" value={hearing !== null ? `${hearing}h` : '-'} />
+        <InfoItem label="打ち合わせ" value={hearing !== null ? `${hearing}h` : '-'} />
         <InfoItem label="企画・構成" value={planning !== null ? `${planning}h` : '-'} />
         <InfoItem label="撮影" value={shooting !== null ? `${shooting}h` : '-'} />
         <InfoItem label="編集〜納品" value={editing !== null ? `${editing}h` : '-'} />

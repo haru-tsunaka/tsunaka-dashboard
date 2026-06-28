@@ -164,7 +164,7 @@ export default function CaseForm({
         <div className="p-4 bg-brand-bg rounded-lg space-y-3">
           <p className="text-xs font-semibold text-brand-muted tracking-wide mb-2">想定工数</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <HoursInput label="ヒアリング" name="est_hours_hearing" value={estHearing} onChange={setEstHearing} />
+            <HoursInput label="打ち合わせ" name="est_hours_hearing" value={estHearing} onChange={setEstHearing} />
             <HoursInput label="企画・構成" name="est_hours_planning" value={estPlanning} onChange={setEstPlanning} />
             <HoursInput label="撮影" name="est_hours_shooting" value={estShooting} onChange={setEstShooting} />
             <HoursInput label="編集〜納品" name="est_hours_editing" value={estEditing} onChange={setEstEditing} />

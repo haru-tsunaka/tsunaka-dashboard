@@ -66,7 +66,7 @@ export interface ProgressLog {
 }
 
 export const WORK_PHASES = [
-  { value: 'hearing', label: 'ヒアリング' },
+  { value: 'hearing', label: '打ち合わせ' },
   { value: 'planning', label: '企画・構成' },
   { value: 'shooting', label: '撮影' },
   { value: 'editing', label: '編集〜納品' },
