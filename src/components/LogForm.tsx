@@ -78,7 +78,7 @@ export default function LogForm({
       clearSavedTime();
       setStartedAt('');
       setEndedAt('');
-    }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4 overflow-hidden">
+    }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
       {/* 案件 */}
       <div>
         <label className="block text-xs text-brand-muted mb-1.5">おもい</label>

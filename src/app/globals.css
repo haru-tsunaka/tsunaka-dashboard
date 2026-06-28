@@ -44,6 +44,11 @@ body {
   border-color: var(--color-navy);
 }
 
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* スクロールバー非表示（フィルタータブ用） */
 .scrollbar-hide {
   -ms-overflow-style: none;
