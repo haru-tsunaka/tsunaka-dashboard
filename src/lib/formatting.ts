@@ -17,6 +17,12 @@ export function formatHoursJa(h: number): string {
   return `${hrs}時間${mins}分`;
 }
 
+/** 時間をh表示（1.5 → "1.5h", 0.25 → "0.25h"） 分析用 */
+export function formatHoursH(h: number): string {
+  const rounded = Math.round(h * 10) / 10;
+  return `${rounded}h`;
+}
+
 /** 日付のみ表示（"2026/6/28"） date-only文字列用 */
 export function formatDate(date: string | null, fallback = ''): string {
   if (!date) return fallback;

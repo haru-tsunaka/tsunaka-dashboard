@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
 import { HOURLY_RATE } from '@/lib/constants';
 import Link from 'next/link';
-import { formatYen, formatHoursJa, phaseLabel } from '@/lib/formatting';
+import { formatYen, formatHoursH, phaseLabel } from '@/lib/formatting';
 
 export default async function HoursPage() {
   const supabase = await createClient();
@@ -152,11 +152,11 @@ export default async function HoursPage() {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <p className="text-xs text-brand-muted mb-1">総稼働時間</p>
-                <p className="text-2xl font-bold text-navy">{formatHoursJa(totalActualHours)}</p>
+                <p className="text-2xl font-bold text-navy">{formatHoursH(totalActualHours)}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-brand-muted mb-1">平均工数/おもい</p>
-                <p className="text-2xl font-bold text-navy">{avgHoursPerCase > 0 ? formatHoursJa(Math.round(avgHoursPerCase * 10) / 10) : '-'}</p>
+                <p className="text-2xl font-bold text-navy">{avgHoursPerCase > 0 ? formatHoursH(avgHoursPerCase) : '-'}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-brand-muted mb-1">実効時給</p>
@@ -180,7 +180,7 @@ export default async function HoursPage() {
                     <div key={phase}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm">{phaseLabel(phase)}</span>
-                        <span className="text-sm font-medium">{formatHoursJa(hours)}<span className="text-xs text-brand-muted ml-1">({pct}%)</span></span>
+                        <span className="text-sm font-medium">{formatHoursH(hours)}<span className="text-xs text-brand-muted ml-1">({pct}%)</span></span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-2">
                         <div className="bg-navy rounded-full h-2 transition-all" style={{ width: `${pct}%` }} />
@@ -203,22 +203,22 @@ export default async function HoursPage() {
                 <span className="text-xs text-brand-muted text-right">差分</span>
 
                 <span className="font-medium">平均</span>
-                <span className="text-right tabular-nums font-bold text-navy">{formatHoursJa(Math.round(avgEstimate * 10) / 10)}</span>
+                <span className="text-right tabular-nums font-bold text-navy">{formatHoursH(avgEstimate)}</span>
                 <span className="text-brand-muted">→</span>
-                <span className="text-right tabular-nums font-bold text-navy">{formatHoursJa(Math.round(avgActual * 10) / 10)}</span>
+                <span className="text-right tabular-nums font-bold text-navy">{formatHoursH(avgActual)}</span>
                 <span className={`text-right tabular-nums font-bold ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                  {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(avgActual - avgEstimate) * 10) / 10)}
+                  {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursH(Math.abs(avgActual - avgEstimate))}
                 </span>
 
                 <div className="col-span-5 border-t border-brand-border/50 my-1" />
                 {phaseAccuracy.filter((p) => p.count > 0).map((p) => (
                   <React.Fragment key={p.phase}>
                     <span>{p.label}</span>
-                    <span className="text-brand-muted text-right tabular-nums">{formatHoursJa(Math.round(p.avgEst * 10) / 10)}</span>
+                    <span className="text-brand-muted text-right tabular-nums">{formatHoursH(p.avgEst)}</span>
                     <span className="text-brand-muted">→</span>
-                    <span className="font-medium text-right tabular-nums">{formatHoursJa(Math.round(p.avgAct * 10) / 10)}</span>
+                    <span className="font-medium text-right tabular-nums">{formatHoursH(p.avgAct)}</span>
                     <span className={`text-right tabular-nums ${p.diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                      {p.diff > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(p.diff) * 10) / 10)}
+                      {p.diff > 0 ? '+' : ''}{formatHoursH(Math.abs(p.diff))}
                     </span>
                   </React.Fragment>
                 ))}
@@ -240,7 +240,7 @@ export default async function HoursPage() {
                     <p className="text-sm font-medium truncate">{ch.case.name}</p>
                     {ch.case.client_name && <p className="text-xs text-brand-muted">{ch.case.client_name}</p>}
                   </div>
-                  <span className="text-sm font-bold text-navy shrink-0 ml-4">{formatHoursJa(ch.total)}</span>
+                  <span className="text-sm font-bold text-navy shrink-0 ml-4">{formatHoursH(ch.total)}</span>
                 </Link>
               ))}
             </div>
