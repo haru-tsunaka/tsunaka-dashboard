@@ -195,30 +195,22 @@ export default async function HoursPage() {
           {estimateAccuracy.length > 0 && (
             <div className="bg-white rounded-lg border border-brand-border p-6">
               <SectionLabel label="見積もり精度" />
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-xs text-brand-muted mb-1">平均見積もり</p>
-                  <p className="text-2xl font-bold text-navy">{formatHoursJa(Math.round(avgEstimate * 10) / 10)}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-brand-muted mb-1">平均実績</p>
-                  <p className="text-2xl font-bold text-navy">{formatHoursJa(Math.round(avgActual * 10) / 10)}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-brand-muted mb-1">平均差分</p>
-                  <p className={`text-2xl font-bold ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                    {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(avgActual - avgEstimate) * 10) / 10)}
-                  </p>
-                </div>
-              </div>
-
-              {/* 工程別精度 */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 gap-y-1 items-center text-sm">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 gap-y-1.5 items-center text-sm">
                 <span />
                 <span className="text-xs text-brand-muted text-right">見積もり</span>
                 <span />
                 <span className="text-xs text-brand-muted text-right">実績</span>
                 <span className="text-xs text-brand-muted text-right">差分</span>
+
+                <span className="font-medium">平均</span>
+                <span className="text-right tabular-nums font-bold text-navy">{formatHoursJa(Math.round(avgEstimate * 10) / 10)}</span>
+                <span className="text-brand-muted">→</span>
+                <span className="text-right tabular-nums font-bold text-navy">{formatHoursJa(Math.round(avgActual * 10) / 10)}</span>
+                <span className={`text-right tabular-nums font-bold ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(avgActual - avgEstimate) * 10) / 10)}
+                </span>
+
+                <div className="col-span-5 border-t border-brand-border/50 my-1" />
                 {phaseAccuracy.filter((p) => p.count > 0).map((p) => (
                   <React.Fragment key={p.phase}>
                     <span>{p.label}</span>
