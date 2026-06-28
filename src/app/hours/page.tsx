@@ -1,3 +1,4 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
@@ -194,32 +195,40 @@ export default async function HoursPage() {
           {estimateAccuracy.length > 0 && (
             <div className="bg-white rounded-lg border border-brand-border p-6">
               <SectionLabel label="見積もり精度" />
-              <div className="flex items-baseline justify-center gap-2 mb-6">
-                <span className="text-sm text-brand-muted">見積もり</span>
-                <span className="text-lg font-bold text-navy">{formatHoursJa(Math.round(avgEstimate * 10) / 10)}</span>
-                <span className="text-brand-muted">→</span>
-                <span className="text-sm text-brand-muted">実績</span>
-                <span className="text-lg font-bold text-navy">{formatHoursJa(Math.round(avgActual * 10) / 10)}</span>
-                <span className={`text-sm font-medium ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                  ({avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(avgActual - avgEstimate) * 10) / 10)})
-                </span>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">平均見積もり</p>
+                  <p className="text-2xl font-bold text-navy">{formatHoursJa(Math.round(avgEstimate * 10) / 10)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">平均実績</p>
+                  <p className="text-2xl font-bold text-navy">{formatHoursJa(Math.round(avgActual * 10) / 10)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">平均差分</p>
+                  <p className={`text-2xl font-bold ${avgActual - avgEstimate > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                    {avgActual - avgEstimate > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(avgActual - avgEstimate) * 10) / 10)}
+                  </p>
+                </div>
               </div>
 
               {/* 工程別精度 */}
-              <p className="text-xs text-brand-muted mb-3">工程別</p>
-              <div className="space-y-2">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 gap-y-1 items-center text-sm">
+                <span />
+                <span className="text-xs text-brand-muted text-right">見積もり</span>
+                <span />
+                <span className="text-xs text-brand-muted text-right">実績</span>
+                <span className="text-xs text-brand-muted text-right">差分</span>
                 {phaseAccuracy.filter((p) => p.count > 0).map((p) => (
-                  <div key={p.phase} className="flex items-center justify-between text-xs">
-                    <span className="text-sm">{p.label}</span>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-brand-muted">{formatHoursJa(Math.round(p.avgEst * 10) / 10)}</span>
-                      <span className="text-brand-muted">→</span>
-                      <span className="font-medium">{formatHoursJa(Math.round(p.avgAct * 10) / 10)}</span>
-                      <span className={`${p.diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                        {p.diff > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(p.diff) * 10) / 10)}
-                      </span>
-                    </div>
-                  </div>
+                  <React.Fragment key={p.phase}>
+                    <span>{p.label}</span>
+                    <span className="text-brand-muted text-right tabular-nums">{formatHoursJa(Math.round(p.avgEst * 10) / 10)}</span>
+                    <span className="text-brand-muted">→</span>
+                    <span className="font-medium text-right tabular-nums">{formatHoursJa(Math.round(p.avgAct * 10) / 10)}</span>
+                    <span className={`text-right tabular-nums ${p.diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                      {p.diff > 0 ? '+' : ''}{formatHoursJa(Math.round(Math.abs(p.diff) * 10) / 10)}
+                    </span>
+                  </React.Fragment>
                 ))}
               </div>
             </div>
