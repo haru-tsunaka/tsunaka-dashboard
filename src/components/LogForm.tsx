@@ -176,7 +176,7 @@ export default function LogForm({
               name="started_at"
               value={startedAt}
               onChange={(e) => setStartedAt(e.target.value)}
-              className="form-input text-sm w-full min-w-0"
+              className="form-input w-full min-w-0"
             />
             {saved && (
               <div className="flex items-center justify-between mt-1">
@@ -208,7 +208,7 @@ export default function LogForm({
               name="ended_at"
               value={endedAt}
               onChange={(e) => setEndedAt(e.target.value)}
-              className="form-input text-sm w-full min-w-0"
+              className="form-input w-full min-w-0"
             />
           </div>
         </div>
