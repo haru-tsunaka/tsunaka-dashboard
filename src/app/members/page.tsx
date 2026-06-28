@@ -36,7 +36,8 @@ export default async function MembersPage() {
   const allProfiles = (profiles || []) as Profile[];
   const owner = allProfiles.find((p) => p.role === 'owner');
   const pendingProfiles = allProfiles.filter((p) => p.status === 'pending');
-  const approvedNonOwner = allProfiles.filter((p) => p.status === 'approved' && p.role !== 'owner');
+  // チームメンバー = approved かつ staff/manager（memberはダイヤリー専用なので表示しない）
+  const teamMembers = allProfiles.filter((p) => p.status === 'approved' && (p.role === 'staff' || p.role === 'manager'));
   const rejectedProfiles = allProfiles.filter((p) => p.status === 'rejected');
 
   async function approveWithRole(formData: FormData) {
@@ -149,12 +150,12 @@ export default async function MembersPage() {
         </div>
       )}
 
-      {/* 承認済みのなかま（owner以外） */}
-      {approvedNonOwner.length > 0 && (
+      {/* チームメンバー（staff/manager） */}
+      {teamMembers.length > 0 && (
         <div className="bg-white rounded-lg border border-brand-border p-6 mb-4">
-          <SectionLabel label="なかま" />
+          <SectionLabel label="チーム" />
           <div className="space-y-3">
-            {approvedNonOwner.map((p) => (
+            {teamMembers.map((p) => (
               <div key={p.id} className="py-3 border-b border-brand-border/50 last:border-0">
                 <div className="flex items-center justify-between mb-2">
                   <div className="min-w-0">
@@ -194,11 +195,11 @@ export default async function MembersPage() {
         </div>
       )}
 
-      {/* なかまがいない場合 */}
-      {approvedNonOwner.length === 0 && pendingProfiles.length === 0 && (
+      {/* チームがいない場合 */}
+      {teamMembers.length === 0 && pendingProfiles.length === 0 && (
         <div className="bg-white rounded-lg border border-brand-border p-6 mb-4">
           <p className="text-sm text-brand-muted text-center py-4">
-            まだなかまがいません
+            まだチームメンバーがいません
           </p>
         </div>
       )}
