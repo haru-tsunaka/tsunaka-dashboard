@@ -8,10 +8,17 @@ import SubmitButton from './SubmitButton';
 
 const STORAGE_KEY = 'hitoha_start_time';
 
+function toLocalDatetime(d: Date) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
 function nowJST() {
-  const d = new Date();
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  return jst.toISOString().slice(0, 16);
+  return toLocalDatetime(new Date());
 }
 
 function todayJST() {
@@ -19,9 +26,7 @@ function todayJST() {
 }
 
 function minutesAgo(min: number) {
-  const d = new Date(Date.now() - min * 60 * 1000);
-  const jst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  return jst.toISOString().slice(0, 16);
+  return toLocalDatetime(new Date(Date.now() - min * 60 * 1000));
 }
 
 function calcHours(start: string, end: string): number | null {
