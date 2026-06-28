@@ -29,6 +29,29 @@ function minutesAgo(min: number) {
   return toLocalDatetime(new Date(Date.now() - min * 60 * 1000));
 }
 
+function titlePlaceholder(phase: string): string {
+  switch (phase) {
+    case 'meeting': return 'ヒアリング、仕様確認など';
+    case 'planning': return '構成案づくり、絵コンテなど';
+    case 'shooting': return 'インタビュー撮影、ロケなど';
+    case 'editing': return 'カット編集、カラグレなど';
+    case 'travel': return '渋谷→横浜';
+    case 'other': return '';
+    default: return '';
+  }
+}
+
+function memoPlaceholder(phase: string): string {
+  switch (phase) {
+    case 'meeting': return '決まったこと、宿題など';
+    case 'planning': return '';
+    case 'shooting': return '天候、機材メモなど';
+    case 'editing': return '';
+    case 'travel': return '電車、タクシーなど';
+    default: return '';
+  }
+}
+
 function calcHours(start: string, end: string): number | null {
   if (!start || !end) return null;
   const s = new Date(start).getTime();
@@ -202,7 +225,7 @@ export default function LogForm({
           name="title"
           required
           defaultValue={defaultTitle || ''}
-          placeholder={isTravel ? '渋谷→横浜' : '打ち合わせ、編集作業など'}
+          placeholder={titlePlaceholder(workPhase)}
           className="form-input"
         />
       </div>
@@ -231,7 +254,7 @@ export default function LogForm({
           name="content"
           rows={2}
           defaultValue={defaultContent || ''}
-          placeholder={isTravel ? '電車、タクシーなど' : ''}
+          placeholder={memoPlaceholder(workPhase)}
           className="form-input resize-none"
         />
       </div>
