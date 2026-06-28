@@ -26,11 +26,11 @@ export interface Case {
   deliverables: string | null;
   menu: string | null;
   plan: string | null;
-  est_hours_hearing: number | null;
+  est_hours_meeting: number | null;
   est_hours_planning: number | null;
   est_hours_shooting: number | null;
   est_hours_editing: number | null;
-  actual_hours_hearing: number | null;
+  actual_hours_meeting: number | null;
   actual_hours_planning: number | null;
   actual_hours_shooting: number | null;
   actual_hours_editing: number | null;
@@ -66,7 +66,7 @@ export interface ProgressLog {
 }
 
 export const WORK_PHASES = [
-  { value: 'hearing', label: '打ち合わせ' },
+  { value: 'meeting', label: '打ち合わせ' },
   { value: 'planning', label: '企画・構成' },
   { value: 'shooting', label: '撮影' },
   { value: 'editing', label: '編集〜納品' },

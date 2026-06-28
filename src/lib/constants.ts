@@ -47,7 +47,7 @@ export const PLANS = [
 ] as const;
 
 export type MenuPlanPreset = {
-  hearing: number;
+  meeting: number;
   planning: number;
   shooting: number;
   editing: number;
@@ -55,18 +55,18 @@ export type MenuPlanPreset = {
 
 export const MENU_PLAN_PRESETS: Record<string, Record<string, MenuPlanPreset>> = {
   family_photo: {
-    light:    { hearing: 0.5, planning: 0.5, shooting: 2, editing: 5 },
-    standard: { hearing: 2,   planning: 2,   shooting: 4, editing: 10 },
+    light:    { meeting: 0.5, planning: 0.5, shooting: 2, editing: 5 },
+    standard: { meeting: 2,   planning: 2,   shooting: 4, editing: 10 },
   },
   anniversary_movie: {
-    light:    { hearing: 0.5, planning: 0.5, shooting: 2, editing: 5 },
-    standard: { hearing: 3,   planning: 2,   shooting: 4, editing: 10 },
+    light:    { meeting: 0.5, planning: 0.5, shooting: 2, editing: 5 },
+    standard: { meeting: 3,   planning: 2,   shooting: 4, editing: 10 },
   },
   pr_video: {
-    standard: { hearing: 3,   planning: 2,   shooting: 4, editing: 10 },
-    premium:  { hearing: 5,   planning: 4,   shooting: 7, editing: 15 },
+    standard: { meeting: 3,   planning: 2,   shooting: 4, editing: 10 },
+    premium:  { meeting: 5,   planning: 4,   shooting: 7, editing: 15 },
   },
   sns_support: {
-    standard: { hearing: 2,   planning: 2,   shooting: 4, editing: 10 },
+    standard: { meeting: 2,   planning: 2,   shooting: 4, editing: 10 },
   },
 };

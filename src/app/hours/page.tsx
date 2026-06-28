@@ -41,7 +41,7 @@ export default async function HoursPage() {
 
   // --- 見積もり精度 ---
   const casesWithBoth = allCases.filter((c) => {
-    const estTotal = (Number(c.est_hours_hearing) || 0) + (Number(c.est_hours_planning) || 0) +
+    const estTotal = (Number(c.est_hours_meeting) || 0) + (Number(c.est_hours_planning) || 0) +
       (Number(c.est_hours_shooting) || 0) + (Number(c.est_hours_editing) || 0);
     if (estTotal === 0) return false;
     // この案件に実績ログがあるか
@@ -49,7 +49,7 @@ export default async function HoursPage() {
   });
 
   const estimateAccuracy = casesWithBoth.map((c) => {
-    const estTotal = (Number(c.est_hours_hearing) || 0) + (Number(c.est_hours_planning) || 0) +
+    const estTotal = (Number(c.est_hours_meeting) || 0) + (Number(c.est_hours_planning) || 0) +
       (Number(c.est_hours_shooting) || 0) + (Number(c.est_hours_editing) || 0);
     const caseLogs = allLogs.filter((l) => l.case_id === c.id);
     const actTotal = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
@@ -64,9 +64,9 @@ export default async function HoursPage() {
     : 0;
 
   // --- 工程別の見積もり精度 ---
-  const phaseKeys = ['hearing', 'planning', 'shooting', 'editing'] as const;
+  const phaseKeys = ['meeting', 'planning', 'shooting', 'editing'] as const;
   const estFieldMap = {
-    hearing: 'est_hours_hearing',
+    meeting: 'est_hours_meeting',
     planning: 'est_hours_planning',
     shooting: 'est_hours_shooting',
     editing: 'est_hours_editing',

@@ -42,11 +42,11 @@ const defaultData: CaseFormData = {
   deliverables: '',
   menu: null,
   plan: null,
-  est_hours_hearing: null,
+  est_hours_meeting: null,
   est_hours_planning: null,
   est_hours_shooting: null,
   est_hours_editing: null,
-  actual_hours_hearing: null,
+  actual_hours_meeting: null,
   actual_hours_planning: null,
   actual_hours_shooting: null,
   actual_hours_editing: null,
@@ -66,7 +66,7 @@ export default function CaseForm({
     return { ...defaultData, ...initialData };
   });
 
-  const [estHearing, setEstHearing] = useState(data.est_hours_hearing ?? '');
+  const [estMeeting, setEstMeeting] = useState(data.est_hours_meeting ?? '');
   const [estPlanning, setEstPlanning] = useState(data.est_hours_planning ?? '');
   const [estShooting, setEstShooting] = useState(data.est_hours_shooting ?? '');
   const [estEditing, setEstEditing] = useState(data.est_hours_editing ?? '');
@@ -77,15 +77,15 @@ export default function CaseForm({
   useEffect(() => {
     if (manualOverride) return;
     const total =
-      (Number(estHearing) || 0) +
+      (Number(estMeeting) || 0) +
       (Number(estPlanning) || 0) +
       (Number(estShooting) || 0) +
       (Number(estEditing) || 0);
     setQuotedAmount(total > 0 ? total * HOURLY_RATE : 0);
-  }, [estHearing, estPlanning, estShooting, estEditing, manualOverride]);
+  }, [estMeeting, estPlanning, estShooting, estEditing, manualOverride]);
 
   const totalEst =
-    (Number(estHearing) || 0) +
+    (Number(estMeeting) || 0) +
     (Number(estPlanning) || 0) +
     (Number(estShooting) || 0) +
     (Number(estEditing) || 0);
@@ -164,7 +164,7 @@ export default function CaseForm({
         <div className="p-4 bg-brand-bg rounded-lg space-y-3">
           <p className="text-xs font-semibold text-brand-muted tracking-wide mb-2">想定工数</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <HoursInput label="打ち合わせ" name="est_hours_hearing" value={estHearing} onChange={setEstHearing} />
+            <HoursInput label="打ち合わせ" name="est_hours_meeting" value={estMeeting} onChange={setEstMeeting} />
             <HoursInput label="企画・構成" name="est_hours_planning" value={estPlanning} onChange={setEstPlanning} />
             <HoursInput label="撮影" name="est_hours_shooting" value={estShooting} onChange={setEstShooting} />
             <HoursInput label="編集〜納品" name="est_hours_editing" value={estEditing} onChange={setEstEditing} />

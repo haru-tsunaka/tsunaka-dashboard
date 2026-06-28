@@ -218,11 +218,11 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* 見積もり */}
-        {showFinancials && (c.est_hours_hearing !== null || c.est_hours_planning !== null || c.est_hours_shooting !== null || c.est_hours_editing !== null) && (
+        {showFinancials && (c.est_hours_meeting !== null || c.est_hours_planning !== null || c.est_hours_shooting !== null || c.est_hours_editing !== null) && (
           <InfoSection label="見積もり">
             <HoursRow
               label="想定工数"
-              hearing={c.est_hours_hearing}
+              meeting={c.est_hours_meeting}
               planning={c.est_hours_planning}
               shooting={c.est_hours_shooting}
               editing={c.est_hours_editing}
@@ -243,21 +243,21 @@ export default async function CaseDetailPage({
           const hasActual = Object.keys(actualByPhase).length > 0;
           if (!hasActual) return null;
 
-          const actHearing = actualByPhase['hearing'] || 0;
+          const actMeeting = actualByPhase['meeting'] || 0;
           const actPlanning = actualByPhase['planning'] || 0;
           const actShooting = actualByPhase['shooting'] || 0;
           const actEditing = actualByPhase['editing'] || 0;
           const actOther = actualByPhase['other'] || 0;
-          const actTotal = actHearing + actPlanning + actShooting + actEditing + actOther;
+          const actTotal = actMeeting + actPlanning + actShooting + actEditing + actOther;
 
-          const estTotal = (c.est_hours_hearing || 0) + (c.est_hours_planning || 0) + (c.est_hours_shooting || 0) + (c.est_hours_editing || 0);
+          const estTotal = (c.est_hours_meeting || 0) + (c.est_hours_planning || 0) + (c.est_hours_shooting || 0) + (c.est_hours_editing || 0);
           const hasEst = estTotal > 0;
           const diff = actTotal - estTotal;
 
           return (
             <InfoSection label="実績工数">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <InfoItem label="打ち合わせ" value={actHearing > 0 ? `${actHearing}h` : '-'} />
+                <InfoItem label="打ち合わせ" value={actMeeting > 0 ? `${actMeeting}h` : '-'} />
                 <InfoItem label="企画・構成" value={actPlanning > 0 ? `${actPlanning}h` : '-'} />
                 <InfoItem label="撮影" value={actShooting > 0 ? `${actShooting}h` : '-'} />
                 <InfoItem label="編集〜納品" value={actEditing > 0 ? `${actEditing}h` : '-'} />
@@ -354,22 +354,22 @@ function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
 
 function HoursRow({
   label,
-  hearing,
+  meeting,
   planning,
   shooting,
   editing,
 }: {
   label: string;
-  hearing: number | null;
+  meeting: number | null;
   planning: number | null;
   shooting: number | null;
   editing: number | null;
 }) {
-  const total = (hearing || 0) + (planning || 0) + (shooting || 0) + (editing || 0);
+  const total = (meeting || 0) + (planning || 0) + (shooting || 0) + (editing || 0);
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoItem label="打ち合わせ" value={hearing !== null ? `${hearing}h` : '-'} />
+        <InfoItem label="打ち合わせ" value={meeting !== null ? `${meeting}h` : '-'} />
         <InfoItem label="企画・構成" value={planning !== null ? `${planning}h` : '-'} />
         <InfoItem label="撮影" value={shooting !== null ? `${shooting}h` : '-'} />
         <InfoItem label="編集〜納品" value={editing !== null ? `${editing}h` : '-'} />
