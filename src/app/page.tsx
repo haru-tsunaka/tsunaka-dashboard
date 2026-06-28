@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, CaseStatus } from '@/lib/types';
 import { CASE_STATUSES } from '@/lib/constants';
@@ -11,6 +12,43 @@ export default async function DashboardPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status: filterStatus } = await searchParams;
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
+      {/* Filter tabs */}
+      <div className="flex items-center gap-0.5 mb-6 md:mb-8 overflow-x-auto pb-2 border-b border-brand-border scrollbar-hide -mx-4 px-4">
+        <FilterTab label="全て" value="" current={filterStatus} />
+        {CASE_STATUSES.map((s) => (
+          <FilterTab key={s} label={s} value={s} current={filterStatus} />
+        ))}
+      </div>
+
+      {/* Case grid with Suspense for tab switching */}
+      <Suspense key={filterStatus || 'all'} fallback={<CaseGridSkeleton />}>
+        <CaseGrid filterStatus={filterStatus} />
+      </Suspense>
+
+      {/* FAB - mobile */}
+      <Link
+        href="/cases/new"
+        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-5 w-14 h-14 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg hover:bg-navy-light transition-colors text-2xl md:hidden active:scale-95"
+      >
+        +
+      </Link>
+      {/* FAB - desktop */}
+      <div className="hidden md:block fixed bottom-8 right-8">
+        <Link
+          href="/cases/new"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium text-sm tracking-wide shadow-lg hover:bg-navy-light transition-colors"
+        >
+          + あたらしいおもい
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+async function CaseGrid({ filterStatus }: { filterStatus?: string }) {
   const profile = await requireApprovedUser();
   const showFinancials = canSeeFinancials(profile.role);
   const supabase = await createClient();
@@ -37,69 +75,60 @@ export default async function DashboardPage({
   const completedCases = allCases.filter((c) => c.status === '完了');
   const showSplit = !filterStatus || filterStatus === '';
 
+  if (allCases.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-brand-muted text-sm mb-6">まだおもいがありません</p>
+        <Link
+          href="/cases/new"
+          className="inline-block px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
+        >
+          最初のおもいをつくる
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
-      {/* Filter tabs */}
-      <div className="flex items-center gap-0.5 mb-6 md:mb-8 overflow-x-auto pb-2 border-b border-brand-border scrollbar-hide -mx-4 px-4">
-        <FilterTab label="全て" value="" current={filterStatus} />
-        {CASE_STATUSES.map((s) => (
-          <FilterTab key={s} label={s} value={s} current={filterStatus} />
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(showSplit ? activeCases : allCases).map((c: Case) => (
+          <CaseCard key={c.id} c={c} showFinancials={showFinancials} />
         ))}
       </div>
 
-      {/* Case grid */}
-      {allCases.length > 0 ? (
+      {/* 完了案件（全て表示時のみ分離） */}
+      {showSplit && completedCases.length > 0 && (
         <>
+          <div className="flex items-center gap-3 mt-10 mb-4">
+            <div className="flex-1 h-px bg-brand-border" />
+            <span className="text-xs text-brand-muted">完了 ({completedCases.length})</span>
+            <div className="flex-1 h-px bg-brand-border" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(showSplit ? activeCases : allCases).map((c: Case) => (
+            {completedCases.map((c: Case) => (
               <CaseCard key={c.id} c={c} showFinancials={showFinancials} />
             ))}
           </div>
-
-          {/* 完了案件（全て表示時のみ分離） */}
-          {showSplit && completedCases.length > 0 && (
-            <>
-              <div className="flex items-center gap-3 mt-10 mb-4">
-                <div className="flex-1 h-px bg-brand-border" />
-                <span className="text-xs text-brand-muted">完了 ({completedCases.length})</span>
-                <div className="flex-1 h-px bg-brand-border" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {completedCases.map((c: Case) => (
-                  <CaseCard key={c.id} c={c} showFinancials={showFinancials} />
-                ))}
-              </div>
-            </>
-          )}
         </>
-      ) : (
-        <div className="text-center py-20">
-          <p className="text-brand-muted text-sm mb-6">まだおもいがありません</p>
-          <Link
-            href="/cases/new"
-            className="inline-block px-8 py-3 rounded-lg bg-navy text-white font-medium text-sm tracking-wide hover:bg-navy-light transition-colors"
-          >
-            最初のおもいをつくる
-          </Link>
-        </div>
       )}
+    </>
+  );
+}
 
-      {/* FAB - mobile */}
-      <Link
-        href="/cases/new"
-        className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-5 w-14 h-14 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg hover:bg-navy-light transition-colors text-2xl md:hidden active:scale-95"
-      >
-        +
-      </Link>
-      {/* FAB - desktop */}
-      <div className="hidden md:block fixed bottom-8 right-8">
-        <Link
-          href="/cases/new"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-navy text-white font-medium text-sm tracking-wide shadow-lg hover:bg-navy-light transition-colors"
-        >
-          + あたらしいおもい
-        </Link>
-      </div>
+function CaseGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white rounded-lg border border-brand-border p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-32 bg-gray-100 rounded animate-pulse" />
+            <div className="h-5 w-14 bg-gray-100 rounded-full" />
+          </div>
+          <div className="h-3 w-20 bg-gray-100 rounded" />
+          <div className="h-3 w-40 bg-gray-100 rounded" />
+        </div>
+      ))}
     </div>
   );
 }
