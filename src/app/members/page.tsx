@@ -119,20 +119,28 @@ export default async function MembersPage() {
                   <p className="text-xs text-brand-muted">{roleLabels[p.role] || p.role}</p>
                 </div>
                 {p.role !== 'owner' && (
-                  <form action={changeRole} className="flex items-center gap-2">
-                    <input type="hidden" name="user_id" value={p.id} />
-                    <select
-                      name="role"
-                      defaultValue={p.role}
-                      className="text-xs border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy"
-                    >
-                      <option value="staff">スタッフ</option>
-                      <option value="manager">マネージャー</option>
-                    </select>
-                    <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors">
-                      変更
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-2">
+                    <form action={changeRole} className="flex items-center gap-2">
+                      <input type="hidden" name="user_id" value={p.id} />
+                      <select
+                        name="role"
+                        defaultValue={p.role}
+                        className="text-xs border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy"
+                      >
+                        <option value="staff">スタッフ</option>
+                        <option value="manager">マネージャー</option>
+                      </select>
+                      <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors">
+                        変更
+                      </button>
+                    </form>
+                    <form action={rejectUser}>
+                      <input type="hidden" name="user_id" value={p.id} />
+                      <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-red-300 hover:text-red-500 transition-colors">
+                        取消
+                      </button>
+                    </form>
+                  </div>
                 )}
               </div>
             ))}
