@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOwner, setIsOwner] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     const checkRole = async () => {
@@ -21,12 +21,14 @@ export default function Header() {
         .select('role')
         .eq('id', user.id)
         .single();
-      if (profile?.role === 'owner') setIsOwner(true);
+      if (profile?.role) setRole(profile.role);
     };
-    if (pathname !== '/login') checkRole();
+    if (pathname !== '/login' && pathname !== '/pending') checkRole();
   }, [pathname]);
 
-  if (pathname === '/login') return null;
+  if (pathname === '/login' || pathname === '/pending') return null;
+
+  const isOwner = role === 'owner';
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -76,6 +78,14 @@ export default function Header() {
                   }`}
                 >
                   じかん
+                </Link>
+                <Link
+                  href="/members"
+                  className={`text-xs md:text-sm py-2 transition-colors ${
+                    pathname === '/members' ? 'text-white' : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  メンバー
                 </Link>
               </>
             )}

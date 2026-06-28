@@ -6,6 +6,7 @@ import CaseForm from '@/components/CaseForm';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
 import Link from 'next/link';
 import { numOrNull } from '@/lib/formatting';
+import { requireApprovedUser, canSeeFinancials } from '@/lib/auth';
 
 export default async function EditCasePage({
   params,
@@ -13,6 +14,8 @@ export default async function EditCasePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const profile = await requireApprovedUser();
+  const showFinancials = canSeeFinancials(profile.role);
   const supabase = await createClient();
 
   const { data: caseData } = await supabase
@@ -81,7 +84,7 @@ export default async function EditCasePage({
         &larr; 戻る
       </Link>
       <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">おもいを編集</h1>
-      <CaseForm initialData={caseData as Case} action={updateCase} />
+      <CaseForm initialData={caseData as Case} action={updateCase} showFinancials={showFinancials} />
 
       <div className="mt-16 pt-8 border-t border-brand-border">
         <DeleteCaseButton deleteAction={deleteCase} />

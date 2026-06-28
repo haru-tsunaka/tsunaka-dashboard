@@ -10,6 +10,7 @@ import { PAYMENT_COLORS, HOURLY_RATE } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
 import NextActionEditor from '@/components/NextActionEditor';
 import { formatDate, formatDateTime, formatYen } from '@/lib/formatting';
+import { requireApprovedUser, canSeeFinancials, canSeeContacts } from '@/lib/auth';
 
 export default async function CaseDetailPage({
   params,
@@ -17,6 +18,9 @@ export default async function CaseDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const profile = await requireApprovedUser();
+  const showFinancials = canSeeFinancials(profile.role);
+  const showContacts = canSeeContacts(profile.role);
   const supabase = await createClient();
 
   const { data: caseData } = await supabase
@@ -189,14 +193,16 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* Contacts */}
-        <InfoSection label="担当者" bg>
-          <ContactSection
-            contacts={(contacts || []) as CaseContact[]}
-            addContactAction={addContact}
-            updateContactAction={updateContact}
-            deleteContactAction={deleteContact}
-          />
-        </InfoSection>
+        {showContacts && (
+          <InfoSection label="担当者" bg>
+            <ContactSection
+              contacts={(contacts || []) as CaseContact[]}
+              addContactAction={addContact}
+              updateContactAction={updateContact}
+              deleteContactAction={deleteContact}
+            />
+          </InfoSection>
+        )}
 
         {/* Schedule */}
         <InfoSection label="スケジュール">
@@ -212,7 +218,7 @@ export default async function CaseDetailPage({
         </InfoSection>
 
         {/* 見積もり */}
-        {(c.est_hours_hearing !== null || c.est_hours_planning !== null || c.est_hours_shooting !== null || c.est_hours_editing !== null) && (
+        {showFinancials && (c.est_hours_hearing !== null || c.est_hours_planning !== null || c.est_hours_shooting !== null || c.est_hours_editing !== null) && (
           <InfoSection label="見積もり">
             <HoursRow
               label="想定工数"
@@ -260,7 +266,7 @@ export default async function CaseDetailPage({
                 合計: <span className="font-bold text-navy">{actTotal}h</span>
                 {actOther > 0 && <span className="ml-1">（その他 {actOther}h 含む）</span>}
               </p>
-              {hasEst && (
+              {showFinancials && hasEst && (
                 <p className={`text-xs mt-1 ${diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
                   見積もり比: {diff > 0 ? '+' : ''}{diff}h ({diff > 0 ? '+' : ''}{formatYen(diff * HOURLY_RATE)})
                 </p>
@@ -270,7 +276,7 @@ export default async function CaseDetailPage({
         })()}
 
         {/* 収支 */}
-        <InfoSection label="収支" bg>
+        {showFinancials && <InfoSection label="収支" bg>
           <InfoGrid>
             <InfoItem label="見積金額" value={formatYen(c.quoted_amount, '未定')} />
             <InfoItem label="入金額" value={formatYen(c.payment_amount, '未定')} />
@@ -289,7 +295,7 @@ export default async function CaseDetailPage({
             )}
             <InfoItem label="入金日" value={c.payment_date ? formatDate(c.payment_date) : '未入金'} />
           </InfoGrid>
-        </InfoSection>
+        </InfoSection>}
 
         {/* Next Action */}
         <InfoSection label="次のアクション">

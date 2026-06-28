@@ -21,7 +21,7 @@ export default function InactivityGuard() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === '/login') return;
+    if (pathname === '/login' || pathname === '/pending') return;
 
     // 初回マウント時にチェック（iOS PWAの復帰対策）
     const elapsed = Date.now() - getLastActivity();

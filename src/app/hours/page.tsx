@@ -1,26 +1,14 @@
 import React from 'react';
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
 import { HOURLY_RATE } from '@/lib/constants';
 import Link from 'next/link';
 import { formatYen, formatHoursH, phaseLabel } from '@/lib/formatting';
+import { requireOwner } from '@/lib/auth';
 
 export default async function HoursPage() {
+  await requireOwner();
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'owner') {
-    redirect('/');
-  }
 
   // 全案件取得
   const { data: cases } = await supabase

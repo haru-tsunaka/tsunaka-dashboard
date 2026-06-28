@@ -3,6 +3,7 @@ import type { Case, CaseStatus } from '@/lib/types';
 import { CASE_STATUSES } from '@/lib/constants';
 import CaseCard from '@/components/CaseCard';
 import Link from 'next/link';
+import { requireApprovedUser, canSeeFinancials } from '@/lib/auth';
 
 export default async function DashboardPage({
   searchParams,
@@ -10,6 +11,8 @@ export default async function DashboardPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status: filterStatus } = await searchParams;
+  const profile = await requireApprovedUser();
+  const showFinancials = canSeeFinancials(profile.role);
   const supabase = await createClient();
 
   let query = supabase
@@ -49,7 +52,7 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {(showSplit ? activeCases : allCases).map((c: Case) => (
-              <CaseCard key={c.id} c={c} />
+              <CaseCard key={c.id} c={c} showFinancials={showFinancials} />
             ))}
           </div>
 
@@ -63,7 +66,7 @@ export default async function DashboardPage({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {completedCases.map((c: Case) => (
-                  <CaseCard key={c.id} c={c} />
+                  <CaseCard key={c.id} c={c} showFinancials={showFinancials} />
                 ))}
               </div>
             </>

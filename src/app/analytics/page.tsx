@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import type { Case } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
-
 import { formatYen } from '@/lib/formatting';
+import { requireOwner } from '@/lib/auth';
 
 function getMonthKey(date: string) {
   const d = new Date(date + 'T00:00:00');
@@ -21,22 +21,9 @@ export default async function AnalyticsPage({
 }: {
   searchParams: Promise<{ year?: string }>;
 }) {
+  await requireOwner();
   const supabase = await createClient();
   const sp = await searchParams;
-
-  // 権限チェック
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'owner') {
-    redirect('/');
-  }
 
   // 案件データ取得
   const { data: cases } = await supabase

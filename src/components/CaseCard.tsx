@@ -4,7 +4,7 @@ import StatusBadge from './StatusBadge';
 import { PAYMENT_COLORS } from '@/lib/constants';
 import { formatDate, formatDateTime, formatYen } from '@/lib/formatting';
 
-export default function CaseCard({ c }: { c: Case }) {
+export default function CaseCard({ c, showFinancials = true }: { c: Case; showFinancials?: boolean }) {
   const nearestDate = c.event_date || c.deadline;
   const isOverdue = c.next_action_by && new Date(c.next_action_by) < new Date();
   const isCompleted = c.status === '完了';
@@ -44,7 +44,7 @@ export default function CaseCard({ c }: { c: Case }) {
             {nearestDate && (
               <span>{formatDate(nearestDate)}</span>
             )}
-            {(c.payment_amount ?? c.quoted_amount) !== null && (
+            {showFinancials && (c.payment_amount ?? c.quoted_amount) !== null && (
               <span className="flex items-center gap-1">
                 {formatYen(c.payment_amount ?? c.quoted_amount)}
                 <span className={`w-1.5 h-1.5 rounded-full ${PAYMENT_COLORS[c.payment_status]}`} />

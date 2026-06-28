@@ -55,9 +55,11 @@ const defaultData: CaseFormData = {
 export default function CaseForm({
   initialData,
   action,
+  showFinancials = true,
 }: {
   initialData?: Case;
   action: (formData: FormData) => Promise<void>;
+  showFinancials?: boolean;
 }) {
   const [data] = useState<CaseFormData>(() => {
     if (!initialData) return defaultData;
@@ -123,13 +125,15 @@ export default function CaseForm({
               ))}
             </select>
           </Field>
-          <Field label="入金状況">
-            <select name="payment_status" defaultValue={data.payment_status} className="form-input">
-              {PAYMENT_STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </Field>
+          {showFinancials && (
+            <Field label="入金状況">
+              <select name="payment_status" defaultValue={data.payment_status} className="form-input">
+                {PAYMENT_STATUSES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </Field>
+          )}
         </div>
       </Section>
 
@@ -156,7 +160,7 @@ export default function CaseForm({
       </Section>
 
       {/* 見積もり */}
-      <Section label="見積もり">
+      {showFinancials && <Section label="見積もり">
         <div className="p-4 bg-brand-bg rounded-lg space-y-3">
           <p className="text-xs font-semibold text-brand-muted tracking-wide mb-2">想定工数</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -175,10 +179,10 @@ export default function CaseForm({
             </span>
           </div>
         </div>
-      </Section>
+      </Section>}
 
       {/* 収支 */}
-      <Section label="収支">
+      {showFinancials && <Section label="収支">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="見積金額（円）">
             <input type="hidden" name="quoted_amount" value={quotedAmount ?? ''} />
@@ -207,7 +211,7 @@ export default function CaseForm({
               className="form-input" />
           </Field>
         </div>
-      </Section>
+      </Section>}
 
       {/* 次のアクション */}
       <Section label="次のアクション">

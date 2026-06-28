@@ -4,8 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import CaseForm from '@/components/CaseForm';
 import Link from 'next/link';
 import { numOrNull } from '@/lib/formatting';
+import { requireApprovedUser, canSeeFinancials } from '@/lib/auth';
 
-export default function NewCasePage() {
+export default async function NewCasePage() {
+  const profile = await requireApprovedUser();
+  const showFinancials = canSeeFinancials(profile.role);
   async function createCase(formData: FormData) {
     'use server';
     const supabase = await createClient();
@@ -55,7 +58,7 @@ export default function NewCasePage() {
         &larr; 戻る
       </Link>
       <h1 className="font-serif text-navy text-xl md:text-2xl font-bold mb-6 md:mb-8">あたらしいおもい</h1>
-      <CaseForm action={createCase} />
+      <CaseForm action={createCase} showFinancials={showFinancials} />
     </div>
   );
 }
