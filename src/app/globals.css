@@ -36,7 +36,7 @@ body {
   padding: 0.625rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid var(--color-brand-border);
-  font-size: 0.875rem;
+  font-size: 1rem;
   transition: border-color 0.2s;
   background: white;
 }
