@@ -36,7 +36,6 @@ export default async function MembersPage() {
   const allProfiles = (profiles || []) as Profile[];
   const owner = allProfiles.find((p) => p.role === 'owner');
   const pendingProfiles = allProfiles.filter((p) => p.status === 'pending');
-  // チームメンバー = approved かつ staff/manager（memberはダイヤリー専用なので表示しない）
   const teamMembers = allProfiles.filter((p) => p.status === 'approved' && (p.role === 'staff' || p.role === 'manager'));
   const rejectedProfiles = allProfiles.filter((p) => p.status === 'rejected');
 
@@ -98,13 +97,13 @@ export default async function MembersPage() {
       {/* オーナー */}
       {owner && (
         <div className="flex items-center gap-3 mb-6 px-1">
-          <div className="w-8 h-8 rounded-full bg-navy flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-navy flex items-center justify-center shrink-0">
             <span className="text-white text-xs font-bold">
               {(owner.email || '?')[0].toUpperCase()}
             </span>
           </div>
-          <div>
-            <p className="text-sm font-medium">{owner.email}</p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{owner.email}</p>
             <p className="text-xs text-gold">{roleLabels.owner}</p>
           </div>
         </div>
@@ -112,37 +111,35 @@ export default async function MembersPage() {
 
       {/* 承認待ち */}
       {pendingProfiles.length > 0 && (
-        <div className="bg-white rounded-lg border border-brand-border p-6 mb-4">
+        <div className="bg-white rounded-lg border border-brand-border p-5 mb-4">
           <SectionLabel label="承認待ち" />
-          <div className="space-y-4">
+          <div className="space-y-5">
             {pendingProfiles.map((p) => (
-              <div key={p.id} className="py-2 border-b border-brand-border/50 last:border-0">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-medium">{p.email || '(メール不明)'}</p>
-                    <p className="text-xs text-brand-muted">{new Date(p.created_at).toLocaleDateString('ja-JP')} 登録</p>
-                  </div>
-                </div>
-                <form action={approveWithRole} className="flex items-center gap-2">
+              <div key={p.id} className="border-b border-brand-border/50 last:border-0 pb-4 last:pb-0">
+                <p className="text-sm font-medium truncate">{p.email || '(メール不明)'}</p>
+                <p className="text-xs text-brand-muted mb-3">{new Date(p.created_at).toLocaleDateString('ja-JP')} 登録</p>
+                <form action={approveWithRole} className="space-y-2">
                   <input type="hidden" name="user_id" value={p.id} />
                   <select
                     name="role"
                     defaultValue="member"
-                    className="text-base border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy flex-1"
+                    className="w-full text-base border border-brand-border rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-navy"
                   >
                     <option value="member">メンバー (ダイヤリーのみ)</option>
                     <option value="staff">スタッフ (案件の閲覧・記録)</option>
                     <option value="manager">マネージャー (金額・連絡先も)</option>
                   </select>
-                  <button type="submit" className="px-3 py-1.5 text-xs rounded-lg bg-navy text-white hover:bg-navy-light transition-colors shrink-0">
-                    承認
-                  </button>
-                  <form action={rejectUser}>
-                    <input type="hidden" name="user_id" value={p.id} />
-                    <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-red-300 hover:text-red-500 transition-colors shrink-0">
-                      拒否
+                  <div className="flex gap-2">
+                    <button type="submit" className="flex-1 py-2 text-xs rounded-lg bg-navy text-white hover:bg-navy-light transition-colors">
+                      承認
                     </button>
-                  </form>
+                  </div>
+                </form>
+                <form action={rejectUser} className="mt-2">
+                  <input type="hidden" name="user_id" value={p.id} />
+                  <button type="submit" className="w-full py-2 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-red-300 hover:text-red-500 transition-colors">
+                    拒否
+                  </button>
                 </form>
               </div>
             ))}
@@ -152,43 +149,37 @@ export default async function MembersPage() {
 
       {/* チームメンバー（staff/manager） */}
       {teamMembers.length > 0 && (
-        <div className="bg-white rounded-lg border border-brand-border p-6 mb-4">
+        <div className="bg-white rounded-lg border border-brand-border p-5 mb-4">
           <SectionLabel label="チーム" />
-          <div className="space-y-3">
+          <div className="space-y-4">
             {teamMembers.map((p) => (
-              <div key={p.id} className="py-3 border-b border-brand-border/50 last:border-0">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{p.email || '(メール不明)'}</p>
-                    <p className="text-xs text-brand-muted">
-                      {roleLabels[p.role] || p.role}
-                      {roleDescriptions[p.role] && ` - ${roleDescriptions[p.role]}`}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <form action={changeRole} className="flex items-center gap-2 flex-1">
-                    <input type="hidden" name="user_id" value={p.id} />
-                    <select
-                      name="role"
-                      defaultValue={p.role}
-                      className="text-base border border-brand-border rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-navy flex-1"
-                    >
-                      <option value="member">メンバー</option>
-                      <option value="staff">スタッフ</option>
-                      <option value="manager">マネージャー</option>
-                    </select>
-                    <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors shrink-0">
-                      変更
-                    </button>
-                  </form>
-                  <form action={removeUser}>
-                    <input type="hidden" name="user_id" value={p.id} />
-                    <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-red-300 hover:text-red-500 transition-colors shrink-0">
-                      外す
-                    </button>
-                  </form>
-                </div>
+              <div key={p.id} className="border-b border-brand-border/50 last:border-0 pb-4 last:pb-0">
+                <p className="text-sm font-medium truncate">{p.email || '(メール不明)'}</p>
+                <p className="text-xs text-brand-muted mb-3">
+                  {roleLabels[p.role] || p.role}
+                  {roleDescriptions[p.role] && ` - ${roleDescriptions[p.role]}`}
+                </p>
+                <form action={changeRole} className="space-y-2">
+                  <input type="hidden" name="user_id" value={p.id} />
+                  <select
+                    name="role"
+                    defaultValue={p.role}
+                    className="w-full text-base border border-brand-border rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-navy"
+                  >
+                    <option value="member">メンバー</option>
+                    <option value="staff">スタッフ</option>
+                    <option value="manager">マネージャー</option>
+                  </select>
+                  <button type="submit" className="w-full py-2 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors">
+                    変更
+                  </button>
+                </form>
+                <form action={removeUser} className="mt-2">
+                  <input type="hidden" name="user_id" value={p.id} />
+                  <button type="submit" className="w-full py-2 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-red-300 hover:text-red-500 transition-colors">
+                    外す
+                  </button>
+                </form>
               </div>
             ))}
           </div>
@@ -204,26 +195,26 @@ export default async function MembersPage() {
         </div>
       )}
 
-      {/* 拒否済み・外したユーザー */}
+      {/* 未承認 */}
       {rejectedProfiles.length > 0 && (
-        <div className="rounded-lg border border-brand-border/50 p-6">
+        <div className="rounded-lg border border-brand-border/50 p-5">
           <SectionLabel label="未承認" />
-          <div className="space-y-3">
+          <div className="space-y-4">
             {rejectedProfiles.map((p) => (
-              <div key={p.id} className="flex items-center justify-between py-2 border-b border-brand-border/50 last:border-0">
-                <p className="text-sm text-brand-muted">{p.email || '(メール不明)'}</p>
-                <form action={approveWithRole} className="flex items-center gap-2">
+              <div key={p.id} className="border-b border-brand-border/50 last:border-0 pb-4 last:pb-0">
+                <p className="text-sm text-brand-muted truncate mb-3">{p.email || '(メール不明)'}</p>
+                <form action={approveWithRole} className="space-y-2">
                   <input type="hidden" name="user_id" value={p.id} />
                   <select
                     name="role"
                     defaultValue="member"
-                    className="text-base border border-brand-border rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-navy"
+                    className="w-full text-base border border-brand-border rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-navy"
                   >
                     <option value="member">メンバー</option>
                     <option value="staff">スタッフ</option>
                     <option value="manager">マネージャー</option>
                   </select>
-                  <button type="submit" className="px-3 py-1.5 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors shrink-0">
+                  <button type="submit" className="w-full py-2 text-xs rounded-lg border border-brand-border text-brand-muted hover:border-navy hover:text-navy transition-colors">
                     承認
                   </button>
                 </form>
