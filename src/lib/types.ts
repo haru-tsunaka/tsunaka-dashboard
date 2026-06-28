@@ -57,6 +57,7 @@ export interface ProgressLog {
   hours: number | null;
   started_at: string | null;
   ended_at: string | null;
+  expense_amount: number | null;
   is_cancelled: boolean;
   user_id: string;
 }

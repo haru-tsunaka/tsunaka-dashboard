@@ -2,7 +2,7 @@
 
 import type { ProgressLog } from '@/lib/types';
 import Link from 'next/link';
-import { formatTime, formatHoursJa, phaseLabel } from '@/lib/formatting';
+import { formatTime, formatHoursJa, formatYen, phaseLabel } from '@/lib/formatting';
 
 type LogWithCase = ProgressLog & { cases: { name: string; client_name: string | null } };
 
@@ -72,6 +72,9 @@ export default function LogTimeline({
                           <span className={`text-xs font-medium ${cancelled ? 'text-brand-muted' : 'text-navy'}`}>
                             {formatHoursJa(Number(log.hours))}
                           </span>
+                        )}
+                        {log.expense_amount !== null && log.expense_amount > 0 && (
+                          <span className="text-[10px] text-brand-muted">{formatYen(log.expense_amount)}</span>
                         )}
                         {cancelled && (
                           <span className="px-1.5 py-0.5 bg-red-100 text-red-500 rounded text-[10px] font-medium">取消</span>

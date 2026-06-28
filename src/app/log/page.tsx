@@ -46,6 +46,8 @@ export default async function LogPage({
 
     const caseId = formData.get('case_id') as string;
 
+    const expenseAmount = formData.get('expense_amount') as string;
+
     const { error } = await supabase.from('progress_logs').insert({
       case_id: caseId,
       title: title.trim(),
@@ -54,6 +56,7 @@ export default async function LogPage({
       hours: hours ? Number(hours) : null,
       started_at: startedAt || null,
       ended_at: endedAt || null,
+      expense_amount: expenseAmount ? Number(expenseAmount) : null,
       user_id: user.id,
     });
 

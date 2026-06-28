@@ -50,10 +50,12 @@ export default function LogForm({
   defaultTitle?: string;
   defaultContent?: string;
 }) {
+  const [workPhase, setWorkPhase] = useState('');
   const [startedAt, setStartedAt] = useState('');
   const [endedAt, setEndedAt] = useState('');
   const [saved, setSaved] = useState(false);
   const hours = calcHours(startedAt, endedAt);
+  const isTravel = workPhase === 'travel';
 
   // ページ読み込み時にlocalStorageから開始時間を復元
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function LogForm({
     <form action={async (formData) => {
       await action(formData);
       clearSavedTime();
+      setWorkPhase('');
       setStartedAt('');
       setEndedAt('');
     }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
@@ -100,7 +103,7 @@ export default function LogForm({
       {/* 工程 */}
       <div>
         <label className="block text-xs text-brand-muted mb-1.5">工程</label>
-        <select name="work_phase" required defaultValue="" className="form-input">
+        <select name="work_phase" required value={workPhase} onChange={(e) => setWorkPhase(e.target.value)} className="form-input">
           <option value="" disabled>選択してください</option>
           {WORK_PHASES.map((p) => (
             <option key={p.value} value={p.value}>{p.label}</option>
@@ -194,15 +197,32 @@ export default function LogForm({
 
       {/* やったこと */}
       <div>
-        <label className="block text-xs text-brand-muted mb-1.5">やったこと</label>
+        <label className="block text-xs text-brand-muted mb-1.5">{isTravel ? '経路' : 'やったこと'}</label>
         <input
           name="title"
           required
           defaultValue={defaultTitle || ''}
-          placeholder="打ち合わせ、編集作業など"
+          placeholder={isTravel ? '渋谷→横浜' : '打ち合わせ、編集作業など'}
           className="form-input"
         />
       </div>
+
+      {/* 交通費（移動時のみ） */}
+      {isTravel && (
+        <div>
+          <label className="block text-xs text-brand-muted mb-1.5">交通費（円）</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            name="expense_amount"
+            placeholder="580"
+            className="form-input"
+            onChange={(e) => {
+              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            }}
+          />
+        </div>
+      )}
 
       {/* メモ */}
       <div>
@@ -211,7 +231,7 @@ export default function LogForm({
           name="content"
           rows={2}
           defaultValue={defaultContent || ''}
-          placeholder=""
+          placeholder={isTravel ? '電車、タクシーなど' : ''}
           className="form-input resize-none"
         />
       </div>
