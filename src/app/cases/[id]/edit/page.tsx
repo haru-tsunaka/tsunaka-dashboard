@@ -46,7 +46,7 @@ export default async function EditCasePage({
         payment_amount: numOrNull(formData, 'payment_amount'),
         payment_date: (formData.get('payment_date') as string) || null,
         next_action: (formData.get('next_action') as string) || null,
-        next_action_by: (formData.get('next_action_by') as string) || null,
+        next_action_by: formData.get('next_action_by') ? `${formData.get('next_action_by')}:00+09:00` : null,
         contact_method: (formData.get('contact_method') as string) || null,
         contact_info: (formData.get('contact_info') as string) || null,
         deliverables: (formData.get('deliverables') as string) || null,

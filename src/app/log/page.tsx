@@ -1,7 +1,8 @@
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { requireApprovedUser } from '@/lib/auth';
 import type { Case, ProgressLog } from '@/lib/types';
 import LogForm from '@/components/LogForm';
 import LogTimeline from '@/components/LogTimeline';
@@ -12,10 +13,8 @@ export default async function LogPage({
   searchParams: Promise<{ case_id?: string; title?: string; content?: string }>;
 }) {
   const params = await searchParams;
+  const { userId } = await requireApprovedUser();
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
 
   // 案件一覧（選択用）
   const { data: cases } = await supabase
@@ -28,7 +27,7 @@ export default async function LogPage({
   const { data: logs } = await supabase
     .from('progress_logs')
     .select('*, cases!inner(name, client_name)')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(30);
 
