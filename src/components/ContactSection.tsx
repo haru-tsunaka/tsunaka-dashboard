@@ -4,6 +4,10 @@ import { useState } from 'react';
 import type { CaseContact } from '@/lib/types';
 import SubmitButton from './SubmitButton';
 
+function hasDetails(contact: CaseContact) {
+  return !!(contact.department || (contact.contact_method && contact.contact_info) || contact.memo);
+}
+
 export default function ContactSection({
   contacts,
   addContactAction,
@@ -17,6 +21,7 @@ export default function ContactSection({
 }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   return (
     <div>
@@ -39,28 +44,27 @@ export default function ContactSection({
               <div key={contact.id} className="bg-white rounded-lg border border-brand-border p-4">
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{contact.name}</span>
-                      {contact.name_reading && (
-                        <span className="text-xs text-brand-muted">({contact.name_reading})</span>
-                      )}
-                      {contact.role && (
-                        <span className="text-xs text-brand-muted">{contact.role}</span>
-                      )}
-                    </div>
-                    {contact.department && (
-                      <p className="text-xs text-brand-muted mb-1">{contact.department}</p>
-                    )}
-                    {contact.contact_method && contact.contact_info && (
-                      <p className="text-xs text-brand-muted">
-                        {contact.contact_method}: {contact.contact_info}
+                    <p className="font-medium text-sm">{contact.name}</p>
+                    {(contact.name_reading || contact.role) && (
+                      <p className="text-xs text-brand-muted mt-0.5">
+                        {[contact.name_reading && `(${contact.name_reading})`, contact.role].filter(Boolean).join(' ')}
                       </p>
                     )}
-                    {contact.memo && (
-                      <p className="text-xs text-brand-muted mt-2 whitespace-pre-wrap border-t border-brand-border pt-2">{contact.memo}</p>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2 ml-3">
+                  <div className="flex items-center gap-2 ml-3 shrink-0">
+                    {hasDetails(contact) && (
+                      <button
+                        onClick={() => setExpandedIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(contact.id)) next.delete(contact.id);
+                          else next.add(contact.id);
+                          return next;
+                        })}
+                        className="text-brand-muted hover:text-navy transition-colors text-xs"
+                      >
+                        {expandedIds.has(contact.id) ? '閉じる' : '詳細'}
+                      </button>
+                    )}
                     <button
                       onClick={() => setEditingId(contact.id)}
                       className="text-brand-muted hover:text-navy transition-colors text-xs"
@@ -78,6 +82,21 @@ export default function ContactSection({
                     </form>
                   </div>
                 </div>
+                {expandedIds.has(contact.id) && (
+                  <div className="mt-3 pt-3 border-t border-brand-border">
+                    {contact.department && (
+                      <p className="text-xs text-brand-muted mb-1">{contact.department}</p>
+                    )}
+                    {contact.contact_method && contact.contact_info && (
+                      <p className="text-xs text-brand-muted mb-1">
+                        {contact.contact_method}: {contact.contact_info}
+                      </p>
+                    )}
+                    {contact.memo && (
+                      <p className="text-xs text-brand-muted whitespace-pre-wrap">{contact.memo}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )
           ))}
