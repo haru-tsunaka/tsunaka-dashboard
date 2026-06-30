@@ -87,7 +87,7 @@ export default function CaseForm({
     (Number(estEditing) || 0);
 
   return (
-    <form action={action} className="space-y-8">
+    <form action={action} className="space-y-8 overflow-hidden">
       {/* 基本情報 */}
       <Section label="基本情報">
         <Field label="おもいの名前" required>
