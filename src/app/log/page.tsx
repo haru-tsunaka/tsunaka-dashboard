@@ -40,8 +40,10 @@ export default async function LogPage({
     const title = formData.get('title') as string;
     if (!title?.trim()) return;
 
-    const startedAt = formData.get('started_at') as string;
-    const endedAt = formData.get('ended_at') as string;
+    const startedAtRaw = formData.get('started_at') as string;
+    const endedAtRaw = formData.get('ended_at') as string;
+    const startedAt = startedAtRaw ? `${startedAtRaw}:00+09:00` : null;
+    const endedAt = endedAtRaw ? `${endedAtRaw}:00+09:00` : null;
     const hours = formData.get('hours') as string;
 
     const caseId = formData.get('case_id') as string;
@@ -54,8 +56,8 @@ export default async function LogPage({
       content: (formData.get('content') as string)?.trim() || '',
       work_phase: (formData.get('work_phase') as string) || null,
       hours: hours ? Number(hours) : null,
-      started_at: startedAt || null,
-      ended_at: endedAt || null,
+      started_at: startedAt,
+      ended_at: endedAt,
       expense_amount: expenseAmount ? Number(expenseAmount) : null,
       user_id: user.id,
     });
