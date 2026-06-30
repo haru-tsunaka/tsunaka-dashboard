@@ -1,4 +1,4 @@
-import type { CaseStatus, PaymentStatus } from './types';
+import type { CaseStatus, PaymentStatus, DeliverableStatus } from './types';
 
 export const CASE_STATUSES: CaseStatus[] = [
   '商談中', '準備中', '進行中', '納品済み', '完了'
@@ -31,6 +31,18 @@ export const PAYMENT_COLORS: Record<PaymentStatus, string> = {
 };
 
 export const HOURLY_RATE = 3000;
+
+export const DELIVERABLE_STATUSES: DeliverableStatus[] = [
+  '予定', '撮影前', '編集中', '納品済み', '入金済み'
+];
+
+export const DELIVERABLE_STATUS_COLORS: Record<DeliverableStatus, { bg: string; text: string }> = {
+  '予定': { bg: 'bg-gray-100', text: 'text-brand-muted' },
+  '撮影前': { bg: 'bg-navy/10', text: 'text-navy' },
+  '編集中': { bg: 'bg-amber-50', text: 'text-amber-700' },
+  '納品済み': { bg: 'bg-green-50', text: 'text-green-700' },
+  '入金済み': { bg: 'bg-green-100', text: 'text-green-800' },
+};
 
 export const MENUS = [
   { value: 'family_photo', label: 'ファミリーフォト' },

@@ -1,10 +1,11 @@
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import type { Case, CaseContact, ProgressLog } from '@/lib/types';
+import type { Case, CaseContact, CaseDeliverable, ProgressLog } from '@/lib/types';
 import StatusBadge from '@/components/StatusBadge';
 import ProgressLogSection from '@/components/ProgressLog';
 import ContactSection from '@/components/ContactSection';
+import DeliverablesSection from '@/components/DeliverablesSection';
 import Link from 'next/link';
 import { PAYMENT_COLORS, HOURLY_RATE } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
@@ -43,6 +44,13 @@ export default async function CaseDetailPage({
     .from('case_contacts')
     .select('*')
     .eq('case_id', id)
+    .order('created_at', { ascending: true });
+
+  const { data: deliverables } = await supabase
+    .from('case_deliverables')
+    .select('*')
+    .eq('case_id', id)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true });
 
   async function cancelLog(formData: FormData) {
@@ -95,6 +103,60 @@ export default async function CaseDetailPage({
     const supabase = await createClient();
     const contactId = formData.get('contact_id') as string;
     await supabase.from('case_contacts').delete().eq('id', contactId);
+    revalidatePath(`/cases/${id}`);
+  }
+
+  async function addDeliverable(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    const amount = formData.get('deliverable_amount') as string;
+    const expense = formData.get('deliverable_expense') as string;
+
+    await supabase.from('case_deliverables').insert({
+      case_id: id,
+      title: (formData.get('deliverable_title') as string).trim(),
+      description: (formData.get('deliverable_description') as string) || null,
+      status: (formData.get('deliverable_status') as string) || '予定',
+      amount: amount ? Number(amount) : null,
+      expense_amount: expense ? Number(expense) : 0,
+      shooting_date: (formData.get('deliverable_shooting_date') as string) || null,
+      due_date: (formData.get('deliverable_due_date') as string) || null,
+      payment_date: (formData.get('deliverable_payment_date') as string) || null,
+      user_id: user.id,
+    });
+
+    revalidatePath(`/cases/${id}`);
+  }
+
+  async function updateDeliverable(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const deliverableId = formData.get('deliverable_id') as string;
+    const amount = formData.get('deliverable_amount') as string;
+    const expense = formData.get('deliverable_expense') as string;
+
+    await supabase.from('case_deliverables').update({
+      title: (formData.get('deliverable_title') as string).trim(),
+      description: (formData.get('deliverable_description') as string) || null,
+      status: (formData.get('deliverable_status') as string) || '予定',
+      amount: amount ? Number(amount) : null,
+      expense_amount: expense ? Number(expense) : 0,
+      shooting_date: (formData.get('deliverable_shooting_date') as string) || null,
+      due_date: (formData.get('deliverable_due_date') as string) || null,
+      payment_date: (formData.get('deliverable_payment_date') as string) || null,
+    }).eq('id', deliverableId);
+
+    revalidatePath(`/cases/${id}`);
+  }
+
+  async function deleteDeliverable(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const deliverableId = formData.get('deliverable_id') as string;
+    await supabase.from('case_deliverables').delete().eq('id', deliverableId);
     revalidatePath(`/cases/${id}`);
   }
 
@@ -214,7 +276,16 @@ export default async function CaseDetailPage({
 
         {/* つくるもの */}
         <InfoSection label="つくるもの" bg>
-          <p className="text-sm whitespace-pre-wrap">{c.deliverables || '未設定'}</p>
+          {c.deliverables && (
+            <p className="text-sm whitespace-pre-wrap mb-4">{c.deliverables}</p>
+          )}
+          <DeliverablesSection
+            deliverables={(deliverables || []) as CaseDeliverable[]}
+            addAction={addDeliverable}
+            updateAction={updateDeliverable}
+            deleteAction={deleteDeliverable}
+            showFinancials={showFinancials}
+          />
         </InfoSection>
 
         {/* 見積もり */}

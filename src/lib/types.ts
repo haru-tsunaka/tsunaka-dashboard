@@ -62,6 +62,24 @@ export interface ProgressLog {
   user_id: string;
 }
 
+export type DeliverableStatus = '予定' | '撮影前' | '編集中' | '納品済み' | '入金済み';
+
+export interface CaseDeliverable {
+  id: string;
+  case_id: string;
+  title: string;
+  description: string | null;
+  amount: number | null;
+  expense_amount: number;
+  status: DeliverableStatus;
+  shooting_date: string | null;
+  due_date: string | null;
+  payment_date: string | null;
+  sort_order: number;
+  created_at: string;
+  user_id: string;
+}
+
 export const WORK_PHASES = [
   { value: 'meeting', label: '打ち合わせ' },
   { value: 'planning', label: '企画・構成' },
