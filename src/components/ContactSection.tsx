@@ -37,6 +37,7 @@ export default function ContactSection({
                   await updateContactAction(formData);
                   setEditingId(null);
                 }}
+                deleteAction={deleteContactAction}
                 onCancel={() => setEditingId(null)}
                 submitLabel="保存"
               />
@@ -71,15 +72,6 @@ export default function ContactSection({
                     >
                       編集
                     </button>
-                    <form action={deleteContactAction}>
-                      <input type="hidden" name="contact_id" value={contact.id} />
-                      <button
-                        type="submit"
-                        className="text-brand-muted hover:text-red-500 transition-colors text-xs"
-                      >
-                        削除
-                      </button>
-                    </form>
                   </div>
                 </div>
                 {expandedIds.has(contact.id) && (
@@ -130,11 +122,13 @@ export default function ContactSection({
 function ContactForm({
   contact,
   action,
+  deleteAction,
   onCancel,
   submitLabel,
 }: {
   contact?: CaseContact;
   action: (formData: FormData) => Promise<void>;
+  deleteAction?: (formData: FormData) => Promise<void>;
   onCancel: () => void;
   submitLabel: string;
 }) {
@@ -181,19 +175,34 @@ function ContactForm({
         <label className="block text-xs text-brand-muted mb-1">メモ</label>
         <textarea name="contact_memo" rows={2} defaultValue={contact?.memo || ''} className="form-input" placeholder="自由にメモ" />
       </div>
-      <div className="flex items-center gap-3 pt-1">
-        <SubmitButton
-          label={submitLabel}
-          pendingLabel={`${submitLabel}中...`}
-          className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98] disabled:opacity-50"
-        />
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2.5 text-xs text-brand-muted hover:text-brand-text transition-colors"
-        >
-          キャンセル
-        </button>
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-3">
+          <SubmitButton
+            label={submitLabel}
+            pendingLabel={`${submitLabel}中...`}
+            className="px-5 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors active:scale-[0.98] disabled:opacity-50"
+          />
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2.5 text-xs text-brand-muted hover:text-brand-text transition-colors"
+          >
+            キャンセル
+          </button>
+        </div>
+        {contact && deleteAction && (
+          <button
+            type="button"
+            onClick={() => {
+              const formData = new FormData();
+              formData.append('contact_id', contact.id);
+              deleteAction(formData);
+            }}
+            className="text-xs text-brand-muted hover:text-red-500 transition-colors"
+          >
+            削除
+          </button>
+        )}
       </div>
     </form>
   );
