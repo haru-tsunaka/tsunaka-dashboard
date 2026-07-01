@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { PAYMENT_COLORS, HOURLY_RATE } from '@/lib/constants';
 import DeleteCaseButton from '@/components/DeleteCaseButton';
 import NextActionEditor from '@/components/NextActionEditor';
-import { formatDate, formatDateTime, formatYen } from '@/lib/formatting';
+import { formatDate, formatDateTime, formatYen, formatHoursH } from '@/lib/formatting';
 import { requireApprovedUser, canSeeFinancials, canSeeContacts } from '@/lib/auth';
 
 export default async function CaseDetailPage({
@@ -329,19 +329,19 @@ export default async function CaseDetailPage({
           return (
             <InfoSection label="実績工数">
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <InfoItem label="打ち合わせ" value={actMeeting > 0 ? `${actMeeting}h` : '-'} />
-                <InfoItem label="企画・構成" value={actPlanning > 0 ? `${actPlanning}h` : '-'} />
-                <InfoItem label="撮影" value={actShooting > 0 ? `${actShooting}h` : '-'} />
-                <InfoItem label="編集〜納品" value={actEditing > 0 ? `${actEditing}h` : '-'} />
-                <InfoItem label="移動" value={actTravel > 0 ? `${actTravel}h` : '-'} />
+                <InfoItem label="打ち合わせ" value={actMeeting > 0 ? formatHoursH(actMeeting) : '-'} />
+                <InfoItem label="企画・構成" value={actPlanning > 0 ? formatHoursH(actPlanning) : '-'} />
+                <InfoItem label="撮影" value={actShooting > 0 ? formatHoursH(actShooting) : '-'} />
+                <InfoItem label="編集〜納品" value={actEditing > 0 ? formatHoursH(actEditing) : '-'} />
+                <InfoItem label="移動" value={actTravel > 0 ? formatHoursH(actTravel) : '-'} />
               </div>
               <p className="text-xs text-brand-muted mt-2">
-                合計: <span className="font-bold text-navy">{actTotal}h</span>
-                {actOther > 0 && <span className="ml-1">（その他 {actOther}h 含む）</span>}
+                合計: <span className="font-bold text-navy">{formatHoursH(actTotal)}</span>
+                {actOther > 0 && <span className="ml-1">（その他 {formatHoursH(actOther)} 含む）</span>}
               </p>
               {showFinancials && hasEst && (
                 <p className={`text-xs mt-1 ${diff > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                  見積もり比: {diff > 0 ? '+' : ''}{diff}h ({diff > 0 ? '+' : ''}{formatYen(diff * HOURLY_RATE)})
+                  見積もり比: {diff > 0 ? '+' : ''}{formatHoursH(diff)} ({diff > 0 ? '+' : ''}{formatYen(diff * HOURLY_RATE)})
                 </p>
               )}
             </InfoSection>

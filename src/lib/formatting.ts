@@ -19,7 +19,7 @@ export function formatHoursJa(h: number): string {
 
 /** 時間をh表示（1.5 → "1.5h", 0.25 → "0.25h"） 分析用 */
 export function formatHoursH(h: number): string {
-  const rounded = Math.round(h * 10) / 10;
+  const rounded = Math.round(h * 100) / 100;
   return `${rounded}h`;
 }
 
