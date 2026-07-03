@@ -319,8 +319,8 @@ export default async function CaseDetailPage({
           const actShooting = actualByPhase['shooting'] || 0;
           const actEditing = actualByPhase['editing'] || 0;
           const actTravel = actualByPhase['travel'] || 0;
-          const actOther = actualByPhase['other'] || 0;
-          const actTotal = actMeeting + actPlanning + actShooting + actEditing + actTravel + actOther;
+          const actDev = actualByPhase['development'] || 0;
+          const actTotal = actMeeting + actPlanning + actShooting + actEditing + actTravel + actDev;
 
           const estTotal = (c.est_hours_meeting || 0) + (c.est_hours_planning || 0) + (c.est_hours_shooting || 0) + (c.est_hours_editing || 0);
           const hasEst = estTotal > 0;
@@ -328,16 +328,16 @@ export default async function CaseDetailPage({
 
           return (
             <InfoSection label="実績工数">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <InfoItem label="打ち合わせ" value={actMeeting > 0 ? formatHoursH(actMeeting) : '-'} />
                 <InfoItem label="企画・構成" value={actPlanning > 0 ? formatHoursH(actPlanning) : '-'} />
                 <InfoItem label="撮影" value={actShooting > 0 ? formatHoursH(actShooting) : '-'} />
                 <InfoItem label="編集〜納品" value={actEditing > 0 ? formatHoursH(actEditing) : '-'} />
+                <InfoItem label="開発" value={actDev > 0 ? formatHoursH(actDev) : '-'} />
                 <InfoItem label="移動" value={actTravel > 0 ? formatHoursH(actTravel) : '-'} />
               </div>
               <p className="text-xs text-brand-muted mt-2">
                 合計: <span className="font-bold text-navy">{formatHoursH(actTotal)}</span>
-                {actOther > 0 && <span className="ml-1">（その他 {formatHoursH(actOther)} 含む）</span>}
               </p>
               {showFinancials && hasEst && (
                 <p className={`text-xs mt-1 ${diff > 0 ? 'text-red-500' : 'text-green-600'}`}>

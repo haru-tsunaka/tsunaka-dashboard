@@ -36,7 +36,7 @@ function titlePlaceholder(phase: string): string {
     case 'shooting': return 'インタビュー撮影、ロケなど';
     case 'editing': return 'カット編集、カラグレなど';
     case 'travel': return '渋谷→横浜';
-    case 'other': return '';
+    case 'development': return 'コーディング、サイト構築など';
     default: return '';
   }
 }
@@ -48,6 +48,7 @@ function memoPlaceholder(phase: string): string {
     case 'shooting': return '天候、機材メモなど';
     case 'editing': return '';
     case 'travel': return '電車、タクシーなど';
+    case 'development': return '';
     default: return '';
   }
 }
