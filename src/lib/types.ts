@@ -87,4 +87,5 @@ export const WORK_PHASES = [
   { value: 'editing', label: '編集〜納品' },
   { value: 'travel', label: '移動' },
   { value: 'development', label: '開発' },
+  { value: 'other', label: 'その他' },
 ] as const;
