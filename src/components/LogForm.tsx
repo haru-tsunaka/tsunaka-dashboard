@@ -242,7 +242,9 @@ export default function LogForm({
             placeholder="580"
             className="form-input"
             onChange={(e) => {
-              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+              e.target.value = e.target.value
+                .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+                .replace(/[^0-9]/g, '');
             }}
           />
         </div>
