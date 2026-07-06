@@ -86,7 +86,8 @@ export const ACTIVITY_CATEGORIES = [
   { value: 'sns', label: 'SNS' },
   { value: 'development', label: '開発' },
   { value: 'admin', label: '事務' },
-  { value: 'marketing', label: 'マーケティング' },
+  { value: 'production', label: '制作' },
+  { value: 'sales', label: '営業' },
   { value: 'other_ops', label: 'その他' },
 ] as const;
 

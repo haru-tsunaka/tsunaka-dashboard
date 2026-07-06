@@ -172,19 +172,21 @@ export default function LogForm({
         </div>
       )}
 
-      {/* 工程 */}
-      <div>
-        <label className="block text-xs text-brand-muted mb-1.5">工程</label>
-        <select name="work_phase" required value={workPhase} onChange={(e) => setWorkPhase(e.target.value)} className="form-input">
-          <option value="" disabled>選択してください</option>
-          {WORK_PHASES.map((p) => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
-        </select>
-      </div>
+      {/* 工程（案件モードのみ） */}
+      {logType === 'case' && (
+        <div>
+          <label className="block text-xs text-brand-muted mb-1.5">工程</label>
+          <select name="work_phase" required value={workPhase} onChange={(e) => setWorkPhase(e.target.value)} className="form-input">
+            <option value="" disabled>選択してください</option>
+            {WORK_PHASES.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
-      {/* 移動中の作業フラグ（移動以外の工程で表示） */}
-      {workPhase && !isTravel && (
+      {/* 移動中の作業フラグ（案件モード・移動以外の工程で表示） */}
+      {logType === 'case' && workPhase && !isTravel && (
         <label className="flex items-center gap-2 text-xs text-brand-muted cursor-pointer">
           <input
             type="checkbox"
