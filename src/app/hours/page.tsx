@@ -2,7 +2,8 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import type { Case, ProgressLog } from '@/lib/types';
 import Link from 'next/link';
-import { formatHoursH, phaseLabel } from '@/lib/formatting';
+import { formatHoursH, formatYen, phaseLabel, activityCategoryLabel } from '@/lib/formatting';
+import { HOURLY_RATE } from '@/lib/constants';
 import { requireOwner } from '@/lib/auth';
 
 export default async function HoursPage() {
@@ -24,11 +25,12 @@ export default async function HoursPage() {
 
   const allLogs = (logs || []) as ProgressLog[];
 
-  // --- 工程別集計 ---
+  // --- 工程別集計（移動中の作業は重複するため除外） ---
   const totalActualByPhase: Record<string, number> = {};
   let totalActualHours = 0;
 
   allLogs.forEach((log) => {
+    if (log.is_during_travel) return;
     const h = Number(log.hours);
     if (log.work_phase && h > 0) {
       totalActualByPhase[log.work_phase] = (totalActualByPhase[log.work_phase] || 0) + h;
@@ -36,10 +38,10 @@ export default async function HoursPage() {
     }
   });
 
-  // --- 案件別の実績 ---
+  // --- 案件別の実績（移動中の作業は除外） ---
   const caseHours = allCases
     .map((c) => {
-      const caseLogs = allLogs.filter((l) => l.case_id === c.id);
+      const caseLogs = allLogs.filter((l) => l.case_id === c.id && !l.is_during_travel);
       const total = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
       return { case: c, total };
     })
@@ -56,13 +58,13 @@ export default async function HoursPage() {
     const estTotal = (Number(c.est_hours_meeting) || 0) + (Number(c.est_hours_planning) || 0) +
       (Number(c.est_hours_shooting) || 0) + (Number(c.est_hours_editing) || 0);
     if (estTotal === 0) return false;
-    return allLogs.some((l) => l.case_id === c.id && Number(l.hours) > 0);
+    return allLogs.some((l) => l.case_id === c.id && !l.is_during_travel && Number(l.hours) > 0);
   });
 
   const estimateAccuracy = casesWithBoth.map((c) => {
     const estTotal = (Number(c.est_hours_meeting) || 0) + (Number(c.est_hours_planning) || 0) +
       (Number(c.est_hours_shooting) || 0) + (Number(c.est_hours_editing) || 0);
-    const caseLogs = allLogs.filter((l) => l.case_id === c.id);
+    const caseLogs = allLogs.filter((l) => l.case_id === c.id && !l.is_during_travel);
     const actTotal = caseLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
     return { case: c, estTotal, actTotal, diff: actTotal - estTotal };
   });
@@ -73,6 +75,21 @@ export default async function HoursPage() {
   const avgActual = estimateAccuracy.length > 0
     ? estimateAccuracy.reduce((sum, a) => sum + a.actTotal, 0) / estimateAccuracy.length
     : 0;
+
+  // --- 活動（運営）の集計 ---
+  const opsLogs = allLogs.filter((l) => l.case_id === null && !l.is_during_travel);
+  const totalOpsHours = opsLogs.reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
+  const opsByCategory: Record<string, number> = {};
+  opsLogs.forEach((log) => {
+    const cat = log.activity_category || 'other_ops';
+    const h = Number(log.hours) || 0;
+    if (h > 0) {
+      opsByCategory[cat] = (opsByCategory[cat] || 0) + h;
+    }
+  });
+
+  // 案件ワークの時間
+  const totalCaseHours = totalActualHours - totalOpsHours;
 
   const phaseKeys = ['meeting', 'planning', 'shooting', 'editing'] as const;
   const estFieldMap = {
@@ -89,7 +106,7 @@ export default async function HoursPage() {
     casesWithBoth.forEach((c) => {
       const est = Number(c[estFieldMap[phase]]) || 0;
       const act = allLogs
-        .filter((l) => l.case_id === c.id && l.work_phase === phase)
+        .filter((l) => l.case_id === c.id && l.work_phase === phase && !l.is_during_travel)
         .reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
       if (est > 0 || act > 0) {
         totalEst += est;
@@ -155,6 +172,42 @@ export default async function HoursPage() {
                 })}
             </div>
           </div>
+
+          {/* 活動（運営） */}
+          {totalOpsHours > 0 && (
+            <div className="bg-white rounded-lg border border-brand-border p-6">
+              <SectionLabel label="活動（運営）" />
+              <div className="grid grid-cols-2 gap-4 mb-5">
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">運営時間</p>
+                  <p className="text-2xl font-bold text-navy">{formatHoursH(totalOpsHours)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-brand-muted mb-1">暗黙コスト</p>
+                  <p className="text-2xl font-bold text-navy">{formatYen(totalOpsHours * HOURLY_RATE)}</p>
+                  <p className="text-[10px] text-brand-muted mt-0.5">{formatYen(HOURLY_RATE)}/h</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {Object.entries(opsByCategory)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([cat, hours]) => {
+                    const pct = totalOpsHours > 0 ? Math.round((hours / totalOpsHours) * 100) : 0;
+                    return (
+                      <div key={cat}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm">{activityCategoryLabel(cat)}</span>
+                          <span className="text-sm font-medium">{formatHoursH(hours)}<span className="text-xs text-brand-muted ml-1">({pct}%)</span></span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div className="bg-gold rounded-full h-2 transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
 
           {/* 見積もり精度 */}
           {estimateAccuracy.length > 0 && (

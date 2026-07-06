@@ -2,9 +2,9 @@
 
 import type { ProgressLog } from '@/lib/types';
 import Link from 'next/link';
-import { formatTime, formatHoursJa, formatYen, phaseLabel } from '@/lib/formatting';
+import { formatTime, formatHoursJa, formatYen, phaseLabel, activityCategoryLabel } from '@/lib/formatting';
 
-type LogWithCase = ProgressLog & { cases: { name: string; client_name: string | null } };
+type LogWithCase = ProgressLog & { cases: { name: string; client_name: string | null } | null };
 
 export default function LogTimeline({
   logs,
@@ -37,6 +37,7 @@ export default function LogTimeline({
               const cancelled = log.is_cancelled;
               const phase = phaseLabel(log.work_phase);
               const hasTime = log.started_at && log.ended_at;
+              const isActivity = log.case_id === null;
               return (
                 <div
                   key={log.id}
@@ -44,14 +45,21 @@ export default function LogTimeline({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      {/* 案件名 */}
-                      <Link
-                        href={`/cases/${log.case_id}`}
-                        className="text-[10px] text-navy hover:underline"
-                      >
-                        {log.cases.name}
-                        {log.cases.client_name && <span className="text-brand-muted ml-1">({log.cases.client_name})</span>}
-                      </Link>
+                      {/* 案件名 or 活動カテゴリ */}
+                      {isActivity ? (
+                        <span className="inline-flex items-center gap-1 text-[10px]">
+                          <span className="px-1.5 py-0.5 bg-gold/15 text-gold rounded font-medium">活動</span>
+                          <span className="text-brand-muted">{activityCategoryLabel(log.activity_category)}</span>
+                        </span>
+                      ) : (
+                        <Link
+                          href={`/cases/${log.case_id}`}
+                          className="text-[10px] text-navy hover:underline"
+                        >
+                          {log.cases?.name}
+                          {log.cases?.client_name && <span className="text-brand-muted ml-1">({log.cases.client_name})</span>}
+                        </Link>
+                      )}
 
                       {/* タイトル */}
                       <p className={`text-sm font-medium mt-0.5 ${cancelled ? 'line-through' : ''}`}>
@@ -92,7 +100,7 @@ export default function LogTimeline({
                     {!cancelled && (
                       <form action={cancelAction}>
                         <input type="hidden" name="log_id" value={log.id} />
-                        <input type="hidden" name="case_id" value={log.case_id} />
+                        <input type="hidden" name="case_id" value={log.case_id || ''} />
                         <button
                           type="submit"
                           className="text-[10px] text-brand-muted hover:text-red-500 transition-colors shrink-0"

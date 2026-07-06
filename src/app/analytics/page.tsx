@@ -43,8 +43,10 @@ export default async function AnalyticsPage({
   const allLogs = (logs || []) as ProgressLog[];
 
   // --- 実効時給・交通費 ---
+  // 移動中の作業は時間が重複するため、実効時給の計算から除外
   const caseHoursMap = new Map<string, { total: number; expense: number }>();
   allLogs.forEach((log) => {
+    if (log.is_during_travel || !log.case_id) return;
     const h = Number(log.hours) || 0;
     const exp = Number(log.expense_amount) || 0;
     const existing = caseHoursMap.get(log.case_id) || { total: 0, expense: 0 };
@@ -52,6 +54,11 @@ export default async function AnalyticsPage({
   });
 
   const totalExpense = allLogs.reduce((sum, log) => sum + (Number(log.expense_amount) || 0), 0);
+
+  // 活動（運営）の時間集計
+  const totalOpsHours = allLogs
+    .filter((l) => l.case_id === null && !l.is_during_travel)
+    .reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
 
   const paidWithHours = allCases
     .filter((c) => c.payment_status === '入金済み' && c.payment_amount && caseHoursMap.has(c.id) && (caseHoursMap.get(c.id)?.total || 0) > 0)
@@ -423,7 +430,7 @@ export default async function AnalyticsPage({
       {/* お金（実効時給・交通費・カテゴリ別・おもい別時給） */}
       <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
         <SectionLabel label="お金" />
-        <div className={`grid ${totalExpense > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-4 mb-5`}>
+        <div className={`grid ${totalExpense > 0 || totalOpsHours > 0 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2'} gap-4 mb-5`}>
           <div className="text-center">
             <p className="text-xs text-brand-muted mb-1">実効時給</p>
             <p className="text-2xl font-bold text-navy">{effectiveHourlyRate > 0 ? formatYen(effectiveHourlyRate) : '-'}</p>
@@ -442,6 +449,13 @@ export default async function AnalyticsPage({
             <div className="text-center">
               <p className="text-xs text-brand-muted mb-1">交通費合計</p>
               <p className="text-2xl font-bold text-navy">{formatYen(totalExpense)}</p>
+            </div>
+          )}
+          {totalOpsHours > 0 && (
+            <div className="text-center">
+              <p className="text-xs text-brand-muted mb-1">運営コスト</p>
+              <p className="text-2xl font-bold text-navy">{formatYen(totalOpsHours * HOURLY_RATE)}</p>
+              <p className="text-[10px] text-brand-muted mt-0.5">{formatHoursH(totalOpsHours)}</p>
             </div>
           )}
         </div>

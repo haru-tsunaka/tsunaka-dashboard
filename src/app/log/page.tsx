@@ -26,7 +26,7 @@ export default async function LogPage({
   // 直近の記録（全案件横断）
   const { data: logs } = await supabase
     .from('progress_logs')
-    .select('*, cases!inner(name, client_name)')
+    .select('*, cases(name, client_name)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(30);
@@ -46,12 +46,15 @@ export default async function LogPage({
     const endedAt = endedAtRaw ? `${endedAtRaw}:00+09:00` : null;
     const hours = formData.get('hours') as string;
 
-    const caseId = formData.get('case_id') as string;
+    const logType = formData.get('log_type') as string;
+    const caseId = logType === 'case' ? (formData.get('case_id') as string) : null;
+    const activityCategory = logType === 'activity' ? (formData.get('activity_category') as string) : null;
 
     const expenseAmount = formData.get('expense_amount') as string;
 
     const { error } = await supabase.from('progress_logs').insert({
       case_id: caseId,
+      activity_category: activityCategory,
       title: title.trim(),
       content: (formData.get('content') as string)?.trim() || '',
       work_phase: (formData.get('work_phase') as string) || null,
@@ -59,6 +62,7 @@ export default async function LogPage({
       started_at: startedAt,
       ended_at: endedAt,
       expense_amount: expenseAmount ? Number(expenseAmount) : null,
+      is_during_travel: formData.get('is_during_travel') === 'true',
       user_id: user.id,
     });
 
@@ -68,7 +72,7 @@ export default async function LogPage({
     }
 
     revalidatePath('/log');
-    revalidatePath(`/cases/${caseId}`);
+    if (caseId) revalidatePath(`/cases/${caseId}`);
   }
 
   async function cancelLog(formData: FormData) {
@@ -78,7 +82,7 @@ export default async function LogPage({
     const caseId = formData.get('case_id') as string;
     await supabase.from('progress_logs').update({ is_cancelled: true }).eq('id', logId);
     revalidatePath('/log');
-    revalidatePath(`/cases/${caseId}`);
+    if (caseId) revalidatePath(`/cases/${caseId}`);
   }
 
   return (
@@ -103,7 +107,7 @@ export default async function LogPage({
           <div className="w-6 h-px bg-gold" />
           <span className="text-xs font-semibold text-gold tracking-widest">最近のきろく</span>
         </div>
-        <LogTimeline logs={(logs || []) as (ProgressLog & { cases: { name: string; client_name: string | null } })[]} cancelAction={cancelLog} />
+        <LogTimeline logs={(logs || []) as (ProgressLog & { cases: { name: string; client_name: string | null } | null })[]} cancelAction={cancelLog} />
       </div>
     </div>
   );

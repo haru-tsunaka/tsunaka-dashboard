@@ -49,7 +49,7 @@ export interface CaseContact {
 
 export interface ProgressLog {
   id: string;
-  case_id: string;
+  case_id: string | null;
   created_at: string;
   title: string | null;
   content: string;
@@ -59,6 +59,8 @@ export interface ProgressLog {
   ended_at: string | null;
   expense_amount: number | null;
   is_cancelled: boolean;
+  is_during_travel: boolean;
+  activity_category: string | null;
   user_id: string;
 }
 
@@ -79,6 +81,14 @@ export interface CaseDeliverable {
   created_at: string;
   user_id: string;
 }
+
+export const ACTIVITY_CATEGORIES = [
+  { value: 'sns', label: 'SNS' },
+  { value: 'development', label: '開発' },
+  { value: 'admin', label: '事務' },
+  { value: 'marketing', label: 'マーケティング' },
+  { value: 'other_ops', label: 'その他' },
+] as const;
 
 export const WORK_PHASES = [
   { value: 'meeting', label: '打ち合わせ' },

@@ -307,7 +307,7 @@ export default async function CaseDetailPage({
           (logs || []).forEach((log) => {
             const l = log as ProgressLog;
             const h = Number(l.hours);
-            if (l.work_phase && h > 0 && !l.is_cancelled) {
+            if (l.work_phase && h > 0 && !l.is_cancelled && !l.is_during_travel) {
               actualByPhase[l.work_phase] = (actualByPhase[l.work_phase] || 0) + h;
             }
           });

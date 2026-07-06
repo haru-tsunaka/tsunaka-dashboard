@@ -1,4 +1,4 @@
-import { WORK_PHASES } from './types';
+import { WORK_PHASES, ACTIVITY_CATEGORIES } from './types';
 
 /** 全角数字・ピリオドを半角に変換 */
 export function toHalfWidth(str: string) {
@@ -78,6 +78,11 @@ export function formatYen(amount: number | null, fallback = ''): string {
 export function phaseLabel(value: string | null): string | null {
   if (!value) return null;
   return WORK_PHASES.find((p) => p.value === value)?.label || value;
+}
+
+export function activityCategoryLabel(value: string | null): string | null {
+  if (!value) return null;
+  return ACTIVITY_CATEGORIES.find((c) => c.value === value)?.label || value;
 }
 
 /** FormDataから数値取得（空ならnull） */

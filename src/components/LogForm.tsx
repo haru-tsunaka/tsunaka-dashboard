@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Case } from '@/lib/types';
-import { WORK_PHASES } from '@/lib/types';
+import { WORK_PHASES, ACTIVITY_CATEGORIES } from '@/lib/types';
 import { formatHoursJa } from '@/lib/formatting';
 import SubmitButton from './SubmitButton';
 
@@ -61,6 +61,8 @@ function calcHours(start: string, end: string): number | null {
   return Math.round(((e - s) / (1000 * 60 * 60)) * 100) / 100;
 }
 
+type LogType = 'case' | 'activity';
+
 export default function LogForm({
   cases,
   action,
@@ -74,10 +76,12 @@ export default function LogForm({
   defaultTitle?: string;
   defaultContent?: string;
 }) {
+  const [logType, setLogType] = useState<LogType>(defaultCaseId ? 'case' : 'case');
   const [workPhase, setWorkPhase] = useState('');
   const [startedAt, setStartedAt] = useState('');
   const [endedAt, setEndedAt] = useState('');
   const [saved, setSaved] = useState(false);
+  const [isDuringTravel, setIsDuringTravel] = useState(false);
   const hours = calcHours(startedAt, endedAt);
   const isTravel = workPhase === 'travel';
 
@@ -110,19 +114,63 @@ export default function LogForm({
       setWorkPhase('');
       setStartedAt('');
       setEndedAt('');
+      setIsDuringTravel(false);
     }} className="bg-white rounded-lg border border-brand-border p-5 space-y-4">
-      {/* 案件 */}
-      <div>
-        <label className="block text-xs text-brand-muted mb-1.5">おもい</label>
-        <select name="case_id" required defaultValue={defaultCaseId || ''} className="form-input">
-          <option value="">選択してください</option>
-          {cases.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}{c.client_name ? ` (${c.client_name})` : ''}
-            </option>
-          ))}
-        </select>
+      <input type="hidden" name="log_type" value={logType} />
+
+      {/* 案件 / 活動 切り替え */}
+      <div className="flex rounded-lg border border-brand-border overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setLogType('case')}
+          className={`flex-1 py-2 text-sm font-medium transition-colors ${
+            logType === 'case'
+              ? 'bg-navy text-white'
+              : 'bg-white text-brand-muted hover:text-navy'
+          }`}
+        >
+          案件
+        </button>
+        <button
+          type="button"
+          onClick={() => setLogType('activity')}
+          className={`flex-1 py-2 text-sm font-medium transition-colors ${
+            logType === 'activity'
+              ? 'bg-navy text-white'
+              : 'bg-white text-brand-muted hover:text-navy'
+          }`}
+        >
+          活動
+        </button>
       </div>
+
+      {/* 案件モード: 案件選択 */}
+      {logType === 'case' && (
+        <div>
+          <label className="block text-xs text-brand-muted mb-1.5">おもい</label>
+          <select name="case_id" required defaultValue={defaultCaseId || ''} className="form-input">
+            <option value="">選択してください</option>
+            {cases.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}{c.client_name ? ` (${c.client_name})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* 活動モード: カテゴリ選択 */}
+      {logType === 'activity' && (
+        <div>
+          <label className="block text-xs text-brand-muted mb-1.5">カテゴリ</label>
+          <select name="activity_category" required className="form-input">
+            <option value="" disabled>選択してください</option>
+            {ACTIVITY_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* 工程 */}
       <div>
@@ -134,6 +182,21 @@ export default function LogForm({
           ))}
         </select>
       </div>
+
+      {/* 移動中の作業フラグ（移動以外の工程で表示） */}
+      {workPhase && !isTravel && (
+        <label className="flex items-center gap-2 text-xs text-brand-muted cursor-pointer">
+          <input
+            type="checkbox"
+            name="is_during_travel"
+            value="true"
+            checked={isDuringTravel}
+            onChange={(e) => setIsDuringTravel(e.target.checked)}
+            className="rounded border-brand-border"
+          />
+          移動中の作業
+        </label>
+      )}
 
       {/* 時間 */}
       <div>
