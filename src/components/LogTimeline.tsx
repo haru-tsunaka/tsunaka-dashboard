@@ -45,11 +45,10 @@ export default function LogTimeline({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      {/* 案件名 or 活動カテゴリ */}
+                      {/* 1行目: 案件名 or 活動ラベル */}
                       {isActivity ? (
-                        <span className="inline-flex items-center gap-1 text-[10px]">
-                          <span className="px-1.5 py-0.5 bg-gold/15 text-gold rounded font-medium">活動</span>
-                          <span className="text-brand-muted">{activityCategoryLabel(log.activity_category)}</span>
+                        <span className="text-[10px] text-gold font-medium">
+                          活動
                         </span>
                       ) : (
                         <Link
@@ -66,11 +65,13 @@ export default function LogTimeline({
                         {log.title}
                       </p>
 
-                      {/* 工程・時間 */}
+                      {/* 工程/カテゴリ・時間 */}
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {phase && (
+                        {isActivity ? (
+                          <span className="px-1.5 py-0.5 bg-gold/10 text-gold rounded text-[10px] font-medium">{activityCategoryLabel(log.activity_category)}</span>
+                        ) : phase ? (
                           <span className="px-1.5 py-0.5 bg-navy/10 text-navy rounded text-[10px] font-medium">{phase}</span>
-                        )}
+                        ) : null}
                         {hasTime && (
                           <span className="text-[10px] text-brand-muted">
                             {formatTime(log.started_at!)} - {formatTime(log.ended_at!)}
