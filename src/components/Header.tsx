@@ -31,8 +31,10 @@ export default function Header() {
   const isOwner = role === 'owner';
 
   const handleLogout = async () => {
+    const savedStartTime = localStorage.getItem('hitoha_start_time');
     const supabase = createClient();
     await supabase.auth.signOut();
+    if (savedStartTime) localStorage.setItem('hitoha_start_time', savedStartTime);
     router.push('/login');
   };
 

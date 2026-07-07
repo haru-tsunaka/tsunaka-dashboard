@@ -26,8 +26,10 @@ export default function InactivityGuard() {
     // 初回マウント時にチェック（iOS PWAの復帰対策）
     const elapsed = Date.now() - getLastActivity();
     if (elapsed > TIMEOUT_MS) {
+      const savedStartTime = localStorage.getItem('hitoha_start_time');
       const supabase = createClient();
       supabase.auth.signOut().then(() => {
+        if (savedStartTime) localStorage.setItem('hitoha_start_time', savedStartTime);
         router.push('/login');
       });
       return;
@@ -40,8 +42,10 @@ export default function InactivityGuard() {
 
     const checkInactivity = async () => {
       if (Date.now() - getLastActivity() > TIMEOUT_MS) {
+        const savedStartTime = localStorage.getItem('hitoha_start_time');
         const supabase = createClient();
         await supabase.auth.signOut();
+        if (savedStartTime) localStorage.setItem('hitoha_start_time', savedStartTime);
         router.push('/login');
       }
     };
