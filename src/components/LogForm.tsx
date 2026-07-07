@@ -85,7 +85,6 @@ export default function LogForm({
   const hours = calcHours(startedAt, endedAt);
   const isTravel = workPhase === 'travel';
   const isActivity = logType === 'activity';
-  const accent = isActivity ? 'gold' : 'navy';
 
   // ページ読み込み時にlocalStorageから開始時間を復元
   useEffect(() => {
@@ -213,36 +212,28 @@ export default function LogForm({
               <button
                 type="button"
                 onClick={() => saveStartTime(nowJST())}
-                className={`text-[10px] px-1.5 py-0.5 rounded font-medium transition-colors ${
-                  isActivity ? 'bg-gold/10 text-gold hover:bg-gold/20' : 'bg-navy/10 text-navy hover:bg-navy/20'
-                }`}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-navy/10 text-navy font-medium hover:bg-navy/20 transition-colors"
               >
                 いま
               </button>
               <button
                 type="button"
                 onClick={() => setStartedAt(minutesAgo(60))}
-                className={`text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted transition-colors ${
-                  isActivity ? 'hover:text-gold' : 'hover:text-navy'
-                }`}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted hover:text-navy transition-colors"
               >
                 1時間前
               </button>
               <button
                 type="button"
                 onClick={() => setStartedAt(minutesAgo(30))}
-                className={`text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted transition-colors ${
-                  isActivity ? 'hover:text-gold' : 'hover:text-navy'
-                }`}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted hover:text-navy transition-colors"
               >
                 30分前
               </button>
               <button
                 type="button"
                 onClick={() => setStartedAt(minutesAgo(15))}
-                className={`text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted transition-colors ${
-                  isActivity ? 'hover:text-gold' : 'hover:text-navy'
-                }`}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted hover:text-navy transition-colors"
               >
                 15分前
               </button>
@@ -256,7 +247,7 @@ export default function LogForm({
             />
             {saved && (
               <div className="flex items-center justify-between mt-1">
-                <span className={`text-[10px] font-medium ${isActivity ? 'text-gold' : 'text-navy'}`}>開始時間を記憶中</span>
+                <span className="text-[10px] text-navy font-medium">開始時間を記憶中</span>
                 <button
                   type="button"
                   onClick={() => { clearSavedTime(); setStartedAt(''); }}
@@ -274,9 +265,7 @@ export default function LogForm({
               <button
                 type="button"
                 onClick={() => setEndedAt(nowJST())}
-                className={`text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted transition-colors ${
-                  isActivity ? 'hover:text-gold' : 'hover:text-navy'
-                }`}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-brand-bg text-brand-muted hover:text-navy transition-colors"
               >
                 いま
               </button>
@@ -292,7 +281,7 @@ export default function LogForm({
         </div>
         <input type="hidden" name="hours" value={hours ?? ''} />
         {hours !== null && (
-          <p className={`text-right text-sm font-bold mt-2 ${isActivity ? 'text-gold' : 'text-navy'}`}>{formatHoursJa(hours)}</p>
+          <p className="text-right text-sm font-bold text-navy mt-2">{formatHoursJa(hours)}</p>
         )}
       </div>
 
@@ -339,14 +328,7 @@ export default function LogForm({
         />
       </div>
 
-      <SubmitButton
-        label="きろく"
-        pendingLabel="記録中..."
-        className={isActivity
-          ? 'w-full py-3 rounded-lg bg-gold text-white font-medium text-sm tracking-wide hover:bg-gold/90 transition-colors active:scale-[0.98] disabled:opacity-50'
-          : undefined
-        }
-      />
+      <SubmitButton label="きろく" pendingLabel="記録中..." />
     </form>
   );
 }
