@@ -30,6 +30,7 @@ export interface Case {
   est_hours_planning: number | null;
   est_hours_shooting: number | null;
   est_hours_editing: number | null;
+  is_recurring: boolean;
   user_id: string;
 }
 

@@ -279,13 +279,15 @@ export default async function CaseDetailPage({
           {c.deliverables && (
             <p className="text-sm whitespace-pre-wrap mb-4">{c.deliverables}</p>
           )}
-          <DeliverablesSection
-            deliverables={(deliverables || []) as CaseDeliverable[]}
-            addAction={addDeliverable}
-            updateAction={updateDeliverable}
-            deleteAction={deleteDeliverable}
-            showFinancials={showFinancials}
-          />
+          {c.is_recurring && (
+            <DeliverablesSection
+              deliverables={(deliverables || []) as CaseDeliverable[]}
+              addAction={addDeliverable}
+              updateAction={updateDeliverable}
+              deleteAction={deleteDeliverable}
+              showFinancials={showFinancials}
+            />
+          )}
         </InfoSection>
 
         {/* 見積もり */}

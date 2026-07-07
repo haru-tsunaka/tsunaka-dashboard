@@ -56,6 +56,7 @@ export default async function EditCasePage({
         est_hours_planning: numOrNull(formData, 'est_hours_planning'),
         est_hours_shooting: numOrNull(formData, 'est_hours_shooting'),
         est_hours_editing: numOrNull(formData, 'est_hours_editing'),
+        is_recurring: formData.get('is_recurring') === 'true',
       })
       .eq('id', id);
 

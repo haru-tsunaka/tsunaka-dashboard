@@ -46,6 +46,7 @@ const defaultData: CaseFormData = {
   est_hours_planning: null,
   est_hours_shooting: null,
   est_hours_editing: null,
+  is_recurring: false,
 };
 
 export default function CaseForm({
@@ -62,6 +63,7 @@ export default function CaseForm({
     return { ...defaultData, ...initialData };
   });
 
+  const [isRecurring, setIsRecurring] = useState(data.is_recurring);
   const [estMeeting, setEstMeeting] = useState(data.est_hours_meeting ?? '');
   const [estPlanning, setEstPlanning] = useState(data.est_hours_planning ?? '');
   const [estShooting, setEstShooting] = useState(data.est_hours_shooting ?? '');
@@ -108,6 +110,29 @@ export default function CaseForm({
         <Field label="概要">
           <textarea name="description" defaultValue={data.description || ''} rows={3}
             className="form-input" />
+        </Field>
+        <Field label="案件タイプ">
+          <input type="hidden" name="is_recurring" value={isRecurring ? 'true' : 'false'} />
+          <div className="flex rounded-lg border border-brand-border overflow-hidden w-fit">
+            <button
+              type="button"
+              onClick={() => setIsRecurring(false)}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                !isRecurring ? 'bg-navy text-white' : 'bg-white text-brand-muted hover:text-navy'
+              }`}
+            >
+              単発
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRecurring(true)}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                isRecurring ? 'bg-navy text-white' : 'bg-white text-brand-muted hover:text-navy'
+              }`}
+            >
+              継続
+            </button>
+          </div>
         </Field>
       </Section>
 
