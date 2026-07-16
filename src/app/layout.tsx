@@ -41,6 +41,11 @@ export default function RootLayout({
         <Header />
         <InactivityGuard />
         <main className="flex-1">{children}</main>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js")`,
+          }}
+        />
       </body>
     </html>
   );
