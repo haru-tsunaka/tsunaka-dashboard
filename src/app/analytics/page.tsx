@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Case, ProgressLog } from '@/lib/types';
+import type { Case, CaseDeliverable, ProgressLog } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
 import { formatYen, formatHoursH } from '@/lib/formatting';
@@ -42,6 +42,39 @@ export default async function AnalyticsPage({
 
   const allLogs = (logs || []) as ProgressLog[];
 
+  // 納品物データ取得（入金済みの分で売上集計に使う）
+  const { data: deliverables } = await supabase
+    .from('case_deliverables')
+    .select('*');
+
+  const allDeliverables = (deliverables || []) as CaseDeliverable[];
+
+  // 案件ごとの入金済み納品物をまとめる
+  const paidDeliverablesByCaseId = new Map<string, CaseDeliverable[]>();
+  allDeliverables
+    .filter((d) => d.status === '入金済み' && d.amount)
+    .forEach((d) => {
+      const list = paidDeliverablesByCaseId.get(d.case_id) || [];
+      list.push(d);
+      paidDeliverablesByCaseId.set(d.case_id, list);
+    });
+
+  // 案件の入金済み売上を返す（deliverableがあればそちらを合算、なければcases.payment_amountにフォールバック）
+  function getCaseRevenue(c: Case): number {
+    const paidDelivs = paidDeliverablesByCaseId.get(c.id);
+    if (paidDelivs && paidDelivs.length > 0) {
+      return paidDelivs.reduce((sum, d) => sum + (d.amount || 0), 0);
+    }
+    return c.payment_amount || 0;
+  }
+
+  // 案件が入金済み（一部でも）かを判定
+  function isCasePaid(c: Case): boolean {
+    const paidDelivs = paidDeliverablesByCaseId.get(c.id);
+    if (paidDelivs && paidDelivs.length > 0) return true;
+    return c.payment_status === '入金済み' && (c.payment_amount || 0) > 0;
+  }
+
   // --- 実効時給・交通費 ---
   // 移動中の作業は時間が重複するため、実効時給の計算から除外
   const caseHoursMap = new Map<string, { total: number; expense: number }>();
@@ -61,14 +94,15 @@ export default async function AnalyticsPage({
     .reduce((sum, l) => sum + (Number(l.hours) || 0), 0);
 
   const paidWithHours = allCases
-    .filter((c) => c.payment_status === '入金済み' && c.payment_amount && caseHoursMap.has(c.id) && (caseHoursMap.get(c.id)?.total || 0) > 0)
+    .filter((c) => isCasePaid(c) && caseHoursMap.has(c.id) && (caseHoursMap.get(c.id)?.total || 0) > 0)
     .map((c) => {
       const hours = caseHoursMap.get(c.id)!;
-      return { case: c, total: hours.total, expense: hours.expense, hourlyRate: (c.payment_amount || 0) / hours.total };
+      const revenue = getCaseRevenue(c);
+      return { case: c, total: hours.total, expense: hours.expense, revenue, hourlyRate: revenue / hours.total };
     })
     .sort((a, b) => b.hourlyRate - a.hourlyRate);
 
-  const totalPaidRevenue = paidWithHours.reduce((sum, ch) => sum + (ch.case.payment_amount || 0), 0);
+  const totalPaidRevenue = paidWithHours.reduce((sum, ch) => sum + ch.revenue, 0);
   const totalPaidHours = paidWithHours.reduce((sum, ch) => sum + ch.total, 0);
   const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
 
@@ -105,13 +139,13 @@ export default async function AnalyticsPage({
     return d.getFullYear() === selectedYear;
   });
 
-  // 年間実績
+  // 年間実績（deliverableベースの入金も含む）
   const annualRevenue = yearCases
-    .filter((c) => c.payment_status === '入金済み' && c.payment_amount)
-    .reduce((sum, c) => sum + (c.payment_amount || 0), 0);
+    .filter((c) => isCasePaid(c))
+    .reduce((sum, c) => sum + getCaseRevenue(c), 0);
 
   const annualExpenses = yearCases
-    .filter((c) => c.payment_status === '入金済み')
+    .filter((c) => isCasePaid(c))
     .reduce((sum, c) => sum + (c.expenses || 0), 0);
 
   const annualProfit = annualRevenue - annualExpenses;
@@ -127,8 +161,8 @@ export default async function AnalyticsPage({
     : [];
 
   const monthlyRevenue = thisMonthCases
-    .filter((c) => c.payment_status === '入金済み' && c.payment_amount)
-    .reduce((sum, c) => sum + (c.payment_amount || 0), 0);
+    .filter((c) => isCasePaid(c))
+    .reduce((sum, c) => sum + getCaseRevenue(c), 0);
 
   const monthlyProgress = monthlyTarget > 0 ? Math.min((monthlyRevenue / monthlyTarget) * 100, 100) : 0;
 
@@ -141,13 +175,13 @@ export default async function AnalyticsPage({
   };
 
   // カテゴリ別集計（入金済みのみ）
-  const paidCases = yearCases.filter((c) => c.payment_status === '入金済み' && c.payment_amount);
+  const paidCases = yearCases.filter((c) => isCasePaid(c));
   const categoryMap = new Map<string, { revenue: number; count: number }>();
   paidCases.forEach((c) => {
     const cat = c.category || 'other';
     const existing = categoryMap.get(cat) || { revenue: 0, count: 0 };
     categoryMap.set(cat, {
-      revenue: existing.revenue + (c.payment_amount || 0),
+      revenue: existing.revenue + getCaseRevenue(c),
       count: existing.count + 1,
     });
   });
@@ -160,16 +194,43 @@ export default async function AnalyticsPage({
     monthlyMap.set(key, { revenue: 0, expenses: 0, count: 0 });
   }
   yearCases
-    .filter((c) => c.payment_status === '入金済み')
+    .filter((c) => isCasePaid(c))
     .forEach((c) => {
-      const key = getMonthKey(c.payment_date || c.created_at);
-      const existing = monthlyMap.get(key);
-      if (existing) {
-        monthlyMap.set(key, {
-          revenue: existing.revenue + (c.payment_amount || 0),
-          expenses: existing.expenses + (c.expenses || 0),
-          count: existing.count + 1,
+      const paidDelivs = paidDeliverablesByCaseId.get(c.id);
+      if (paidDelivs && paidDelivs.length > 0) {
+        // deliverable単位で月に振り分け
+        paidDelivs.forEach((d) => {
+          const key = getMonthKey(d.payment_date || c.payment_date || c.created_at);
+          const existing = monthlyMap.get(key);
+          if (existing) {
+            monthlyMap.set(key, {
+              revenue: existing.revenue + (d.amount || 0),
+              expenses: existing.expenses,
+              count: existing.count,
+            });
+          }
         });
+        // 経費・件数は案件単位で1回だけ加算
+        const key = getMonthKey(c.payment_date || c.created_at);
+        const existing = monthlyMap.get(key);
+        if (existing) {
+          monthlyMap.set(key, {
+            revenue: existing.revenue,
+            expenses: existing.expenses + (c.expenses || 0),
+            count: existing.count + 1,
+          });
+        }
+      } else {
+        // deliverableなし → 従来通り
+        const key = getMonthKey(c.payment_date || c.created_at);
+        const existing = monthlyMap.get(key);
+        if (existing) {
+          monthlyMap.set(key, {
+            revenue: existing.revenue + (c.payment_amount || 0),
+            expenses: existing.expenses + (c.expenses || 0),
+            count: existing.count + 1,
+          });
+        }
       }
     });
 
@@ -178,7 +239,7 @@ export default async function AnalyticsPage({
   const activeCases = yearCases.filter((c) => c.status !== '完了').length;
   const completedCases = yearCases.filter((c) => c.status === '完了').length;
   const avgDealSize = paidCases.length > 0
-    ? paidCases.reduce((sum, c) => sum + (c.payment_amount || 0), 0) / paidCases.length
+    ? paidCases.reduce((sum, c) => sum + getCaseRevenue(c), 0) / paidCases.length
     : 0;
 
   // リピートクライアント
