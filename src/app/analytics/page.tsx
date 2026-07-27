@@ -151,18 +151,29 @@ export default async function AnalyticsPage({
   const annualProfit = annualRevenue - annualExpenses;
   const annualProgress = annualTarget > 0 ? Math.min((annualRevenue / annualTarget) * 100, 100) : 0;
 
-  // 今月の実績（今年のみ）
-  const thisMonthCases = isCurrentYear
-    ? yearCases.filter((c) => {
-        const dateStr = c.payment_date || c.created_at;
-        const d = new Date(dateStr);
-        return d.getMonth() + 1 === currentMonth;
-      })
-    : [];
-
-  const monthlyRevenue = thisMonthCases
-    .filter((c) => isCasePaid(c))
-    .reduce((sum, c) => sum + getCaseRevenue(c), 0);
+  // 今月の実績（今年のみ、deliverable単位で月振り分け）
+  let monthlyRevenue = 0;
+  if (isCurrentYear) {
+    const currentMonthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+    yearCases
+      .filter((c) => isCasePaid(c))
+      .forEach((c) => {
+        const paidDelivs = paidDeliverablesByCaseId.get(c.id);
+        if (paidDelivs && paidDelivs.length > 0) {
+          paidDelivs.forEach((d) => {
+            const key = getMonthKey(d.payment_date || c.payment_date || c.created_at);
+            if (key === currentMonthKey) {
+              monthlyRevenue += d.amount || 0;
+            }
+          });
+        } else {
+          const key = getMonthKey(c.payment_date || c.created_at);
+          if (key === currentMonthKey) {
+            monthlyRevenue += c.payment_amount || 0;
+          }
+        }
+      });
+  }
 
   const monthlyProgress = monthlyTarget > 0 ? Math.min((monthlyRevenue / monthlyTarget) * 100, 100) : 0;
 
