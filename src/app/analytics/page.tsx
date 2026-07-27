@@ -106,6 +106,11 @@ export default async function AnalyticsPage({
   const totalPaidHours = paidWithHours.reduce((sum, ch) => sum + ch.total, 0);
   const effectiveHourlyRate = totalPaidHours > 0 ? totalPaidRevenue / totalPaidHours : 0;
 
+  // 工数未記録の入金済み案件
+  const paidWithoutHours = allCases.filter(
+    (c) => isCasePaid(c) && (!caseHoursMap.has(c.id) || (caseHoursMap.get(c.id)?.total || 0) === 0)
+  );
+
   // 年度のリストを作成（データが存在する年 + 今年）
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -531,6 +536,21 @@ export default async function AnalyticsPage({
             </div>
           )}
         </div>
+
+        {paidWithoutHours.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            <p className="text-xs text-amber-700">
+              工数未記録の入金済み案件が{paidWithoutHours.length}件あります（売上合計・時給に含まれていません）
+            </p>
+            <div className="mt-2 space-y-1">
+              {paidWithoutHours.map((c) => (
+                <Link key={c.id} href={`/cases/${c.id}`} className="block text-xs text-amber-600 hover:text-amber-800">
+                  {c.name} ({formatYen(getCaseRevenue(c))})
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {paidWithHours.length > 0 && (
           <div className="border-t border-brand-border/50 pt-4">
