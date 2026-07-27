@@ -138,15 +138,24 @@ export default async function CaseDetailPage({
     const amount = formData.get('deliverable_amount') as string;
     const expense = formData.get('deliverable_expense') as string;
 
+    const status = (formData.get('deliverable_status') as string) || '予定';
+    let paymentDate = (formData.get('deliverable_payment_date') as string) || null;
+
+    // 入金済みにしたとき、payment_dateが空なら当日を自動セット
+    if (status === '入金済み' && !paymentDate) {
+      const now = new Date();
+      paymentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
     await supabase.from('case_deliverables').update({
       title: (formData.get('deliverable_title') as string).trim(),
       description: (formData.get('deliverable_description') as string) || null,
-      status: (formData.get('deliverable_status') as string) || '予定',
+      status,
       amount: amount ? Number(amount) : null,
       expense_amount: expense ? Number(expense) : 0,
       shooting_date: (formData.get('deliverable_shooting_date') as string) || null,
       due_date: (formData.get('deliverable_due_date') as string) || null,
-      payment_date: (formData.get('deliverable_payment_date') as string) || null,
+      payment_date: paymentDate,
     }).eq('id', deliverableId);
 
     revalidatePath(`/cases/${id}`);
