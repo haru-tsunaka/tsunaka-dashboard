@@ -13,6 +13,12 @@ function getMonthKey(date: string) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/** タイムスタンプ（progress_logs の started_at / created_at）を JST の月キーに */
+function getJstMonthKey(ts: string) {
+  const d = new Date(new Date(ts).getTime() + 9 * 60 * 60 * 1000);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
 function getMonthLabel(key: string) {
   const [, m] = key.split('-');
   return `${Number(m)}月`;
@@ -68,6 +74,23 @@ export default async function AnalyticsPage({
     }
     return c.payment_amount || 0;
   }
+
+  // 案件の経費 = 案件の「経費」欄 + 納品物の経費 + 作業ログの交通費
+  const deliverableExpenseByCaseId = new Map<string, number>();
+  allDeliverables.forEach((d) => {
+    deliverableExpenseByCaseId.set(d.case_id, (deliverableExpenseByCaseId.get(d.case_id) || 0) + (d.expense_amount || 0));
+  });
+  const logExpenseByCaseId = new Map<string, number>();
+  allLogs.forEach((log) => {
+    if (!log.case_id) return;
+    logExpenseByCaseId.set(log.case_id, (logExpenseByCaseId.get(log.case_id) || 0) + (Number(log.expense_amount) || 0));
+  });
+  function getCaseExpense(c: Case): number {
+    return (c.expenses || 0) + (deliverableExpenseByCaseId.get(c.id) || 0) + (logExpenseByCaseId.get(c.id) || 0);
+  }
+
+  // 活動（運営）ログの交通費：案件にひもづかない経費
+  const opsExpenseLogs = allLogs.filter((l) => l.case_id === null && (Number(l.expense_amount) || 0) > 0);
 
   // 案件が入金済み（一部でも）かを判定
   function isCasePaid(c: Case): boolean {
@@ -150,9 +173,13 @@ export default async function AnalyticsPage({
     .filter((c) => isCasePaid(c))
     .reduce((sum, c) => sum + getCaseRevenue(c), 0);
 
+  const annualOpsExpenses = opsExpenseLogs
+    .filter((l) => getJstMonthKey(l.started_at || l.created_at).startsWith(`${selectedYear}-`))
+    .reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
+
   const annualExpenses = yearCases
     .filter((c) => isCasePaid(c))
-    .reduce((sum, c) => sum + (c.expenses || 0), 0);
+    .reduce((sum, c) => sum + getCaseExpense(c), 0) + annualOpsExpenses;
 
   const annualProfit = annualRevenue - annualExpenses;
   const annualProgress = annualTarget > 0 ? Math.min((annualRevenue / annualTarget) * 100, 100) : 0;
@@ -233,7 +260,7 @@ export default async function AnalyticsPage({
         if (existing) {
           monthlyMap.set(key, {
             revenue: existing.revenue,
-            expenses: existing.expenses + (c.expenses || 0),
+            expenses: existing.expenses + getCaseExpense(c),
             count: existing.count + 1,
           });
         }
@@ -244,12 +271,21 @@ export default async function AnalyticsPage({
         if (existing) {
           monthlyMap.set(key, {
             revenue: existing.revenue + (c.payment_amount || 0),
-            expenses: existing.expenses + (c.expenses || 0),
+            expenses: existing.expenses + getCaseExpense(c),
             count: existing.count + 1,
           });
         }
       }
     });
+
+  // 活動（運営）の交通費は、使った月に入れる
+  opsExpenseLogs.forEach((l) => {
+    const key = getJstMonthKey(l.started_at || l.created_at);
+    const existing = monthlyMap.get(key);
+    if (existing) {
+      monthlyMap.set(key, { ...existing, expenses: existing.expenses + (Number(l.expense_amount) || 0) });
+    }
+  });
 
   // 概要
   const totalCases = yearCases.length;
@@ -300,10 +336,11 @@ export default async function AnalyticsPage({
   const allInvestments = (investmentData || []) as Investment[];
   const investmentTableMissing = !!investmentError;
   const totalInvested = allInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
-  // 回収した額 = 入金済み案件の粗利（売上 − 経費）の合計
+  // 回収した額 = 入金済み案件の粗利（売上 − 経費）の合計 − 活動（運営）の交通費
+  const totalOpsExpenses = opsExpenseLogs.reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
   const totalRecovered = allCases
     .filter((c) => isCasePaid(c))
-    .reduce((sum, c) => sum + getCaseRevenue(c) - (c.expenses || 0), 0);
+    .reduce((sum, c) => sum + getCaseRevenue(c) - getCaseExpense(c), 0) - totalOpsExpenses;
 
   async function addInvestment(formData: FormData) {
     'use server';

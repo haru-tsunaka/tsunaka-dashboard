@@ -53,6 +53,13 @@ export default async function CaseDetailPage({
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true });
 
+  // 経費 = 案件の「経費」欄 + 納品物の経費 + 作業ログの交通費（取消は除く）
+  const deliverableExpense = ((deliverables || []) as CaseDeliverable[]).reduce((sum, d) => sum + (d.expense_amount || 0), 0);
+  const logExpense = ((logs || []) as ProgressLog[])
+    .filter((l) => !l.is_cancelled)
+    .reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
+  const totalCaseExpense = (c.expenses || 0) + deliverableExpense + logExpense;
+
   async function cancelLog(formData: FormData) {
     'use server';
     const supabase = await createClient();
@@ -364,7 +371,7 @@ export default async function CaseDetailPage({
           <InfoGrid>
             <InfoItem label="見積金額" value={formatYen(c.quoted_amount, '未定')} />
             <InfoItem label="入金額" value={formatYen(c.payment_amount, '未定')} />
-            <InfoItem label="経費" value={formatYen(c.expenses, '未定')} />
+            <InfoItem label="経費" value={formatYen(totalCaseExpense, '未定')} />
             <InfoItem
               label="入金状況"
               value={
@@ -375,7 +382,7 @@ export default async function CaseDetailPage({
               }
             />
             {c.payment_amount !== null && (
-              <InfoItem label="粗利" value={formatYen(c.payment_amount - c.expenses)} />
+              <InfoItem label="粗利" value={formatYen(c.payment_amount - totalCaseExpense)} />
             )}
             <InfoItem label="入金日" value={c.payment_date ? formatDate(c.payment_date) : '未入金'} />
           </InfoGrid>
