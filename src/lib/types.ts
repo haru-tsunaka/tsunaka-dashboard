@@ -86,11 +86,20 @@ export interface CaseDeliverable {
 export const INVESTMENT_CATEGORIES = ['機材', 'PC・ソフト', '学び', 'その他'] as const;
 export type InvestmentCategory = (typeof INVESTMENT_CATEGORIES)[number];
 
+/** 按分したあとの、投資として数える額 */
+export function investmentBusinessAmount(inv: Pick<Investment, 'amount' | 'business_ratio'>): number {
+  const ratio = inv.business_ratio ?? 100;
+  return Math.round(((inv.amount || 0) * ratio) / 100);
+}
+
 /** 投資（機材・PCなど、案件にひもづかない長く使うもの） */
 export interface Investment {
   id: string;
   title: string;
+  /** 本体価格（按分前） */
   amount: number;
+  /** 事業で使う割合（%）。家事按分。投資として数えるのは amount × business_ratio / 100 */
+  business_ratio: number;
   category: InvestmentCategory;
   purchased_at: string | null;
   note: string | null;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import MoneyInput from '@/components/MoneyInput';
 import SubmitButton from './SubmitButton';
-import { INVESTMENT_CATEGORIES, type Investment } from '@/lib/types';
+import { INVESTMENT_CATEGORIES, investmentBusinessAmount, type Investment } from '@/lib/types';
 import { formatYen, formatDate } from '@/lib/formatting';
 
 export default function InvestmentSection({
@@ -91,7 +91,14 @@ export default function InvestmentSection({
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-medium">{formatYen(inv.amount)}</span>
+                    <div className="text-right">
+                      <span className="text-sm font-medium">{formatYen(investmentBusinessAmount(inv))}</span>
+                      {(inv.business_ratio ?? 100) < 100 && (
+                        <p className="text-[10px] text-brand-muted">
+                          {formatYen(inv.amount)} × {inv.business_ratio}%
+                        </p>
+                      )}
+                    </div>
                     {confirmingId === inv.id ? (
                       <form action={deleteAction} className="flex items-center gap-2">
                         <input type="hidden" name="id" value={inv.id} />
@@ -125,13 +132,31 @@ export default function InvestmentSection({
         <form action={addAction} className="border-t border-brand-border/50 pt-4 mt-4 space-y-3">
           <input name="title" required placeholder="例: Sony FE 50mm F1.4 GM" className="form-input" />
           <div className="grid grid-cols-2 gap-3">
-            <MoneyInput name="amount" placeholder="例: 198,000" />
-            <select name="category" defaultValue="機材" className="form-input">
-              {INVESTMENT_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <div>
+              <p className="text-[10px] text-brand-muted mb-1">本体価格</p>
+              <MoneyInput name="amount" placeholder="例: 180,000" />
+            </div>
+            <div>
+              <p className="text-[10px] text-brand-muted mb-1">事業で使う割合（家事按分）</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="business_ratio"
+                  min={1}
+                  max={100}
+                  defaultValue={100}
+                  inputMode="numeric"
+                  className="form-input"
+                />
+                <span className="text-sm text-brand-muted">%</span>
+              </div>
+            </div>
           </div>
+          <select name="category" defaultValue="機材" className="form-input" aria-label="分類">
+            {INVESTMENT_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
           <div className="grid grid-cols-2 gap-3">
             <input type="date" name="purchased_at" className="form-input" aria-label="買った日" />
             <input name="note" placeholder="メモ（例: 中古で購入）" className="form-input" />

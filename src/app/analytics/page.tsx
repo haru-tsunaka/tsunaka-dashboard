@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { INVESTMENT_CATEGORIES, type Case, type CaseDeliverable, type Investment, type ProgressLog } from '@/lib/types';
+import { INVESTMENT_CATEGORIES, investmentBusinessAmount, type Case, type CaseDeliverable, type Investment, type ProgressLog } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
 import InvestmentSection from '@/components/InvestmentSection';
@@ -335,7 +335,7 @@ export default async function AnalyticsPage({
 
   const allInvestments = (investmentData || []) as Investment[];
   const investmentTableMissing = !!investmentError;
-  const totalInvested = allInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+  const totalInvested = allInvestments.reduce((sum, inv) => sum + investmentBusinessAmount(inv), 0);
   // 回収した額 = 入金済み案件の粗利（売上 − 経費）の合計 − 活動（運営）の交通費
   const totalOpsExpenses = opsExpenseLogs.reduce((sum, l) => sum + (Number(l.expense_amount) || 0), 0);
   const totalRecovered = allCases
@@ -350,6 +350,8 @@ export default async function AnalyticsPage({
 
     const title = String(formData.get('title') || '').trim();
     const amount = Number(formData.get('amount'));
+    const rawRatio = Math.round(Number(formData.get('business_ratio')));
+    const businessRatio = rawRatio >= 1 && rawRatio <= 100 ? rawRatio : 100;
     const rawCategory = String(formData.get('category') || '機材');
     const category = (INVESTMENT_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : 'その他';
     const purchasedAt = String(formData.get('purchased_at') || '') || null;
@@ -358,7 +360,7 @@ export default async function AnalyticsPage({
     if (title && amount > 0) {
       await supabase
         .from('investments')
-        .insert({ title, amount, category, purchased_at: purchasedAt, note, user_id: user.id });
+        .insert({ title, amount, business_ratio: businessRatio, category, purchased_at: purchasedAt, note, user_id: user.id });
     }
     redirect(`/analytics?year=${selectedYear}`);
   }
