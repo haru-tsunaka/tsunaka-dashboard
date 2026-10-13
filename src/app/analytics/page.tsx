@@ -365,6 +365,28 @@ export default async function AnalyticsPage({
     redirect(`/analytics?year=${selectedYear}`);
   }
 
+  async function updateInvestment(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const id = String(formData.get('id') || '');
+    const title = String(formData.get('title') || '').trim();
+    const amount = Number(formData.get('amount'));
+    const rawRatio = Math.round(Number(formData.get('business_ratio')));
+    const businessRatio = rawRatio >= 1 && rawRatio <= 100 ? rawRatio : 100;
+    const rawCategory = String(formData.get('category') || '機材');
+    const category = (INVESTMENT_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : 'その他';
+    const purchasedAt = String(formData.get('purchased_at') || '') || null;
+    const note = String(formData.get('note') || '').trim() || null;
+
+    if (id && title && amount > 0) {
+      await supabase
+        .from('investments')
+        .update({ title, amount, business_ratio: businessRatio, category, purchased_at: purchasedAt, note })
+        .eq('id', id);
+    }
+    redirect(`/analytics?year=${selectedYear}`);
+  }
+
   async function deleteInvestment(formData: FormData) {
     'use server';
     const supabase = await createClient();
@@ -596,6 +618,7 @@ export default async function AnalyticsPage({
           totalRecovered={totalRecovered}
           tableMissing={investmentTableMissing}
           addAction={addInvestment}
+          updateAction={updateInvestment}
           deleteAction={deleteInvestment}
         />
       </div>

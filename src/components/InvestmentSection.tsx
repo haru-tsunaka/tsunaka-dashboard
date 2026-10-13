@@ -12,6 +12,7 @@ export default function InvestmentSection({
   totalRecovered,
   tableMissing,
   addAction,
+  updateAction,
   deleteAction,
 }: {
   investments: Investment[];
@@ -19,11 +20,13 @@ export default function InvestmentSection({
   totalRecovered: number;
   tableMissing: boolean;
   addAction: (formData: FormData) => Promise<void>;
+  updateAction: (formData: FormData) => Promise<void>;
   deleteAction: (formData: FormData) => Promise<void>;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [showList, setShowList] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (tableMissing) {
     return (
@@ -80,7 +83,22 @@ export default function InvestmentSection({
           </button>
           {showList && (
             <div className="mt-3 space-y-2">
-              {investments.map((inv) => (
+              {investments.map((inv) => editingId === inv.id ? (
+                <form key={inv.id} action={updateAction} className="space-y-3 py-3 border-y border-brand-border/50">
+                  <input type="hidden" name="id" value={inv.id} />
+                  <InvestmentFields inv={inv} />
+                  <div className="flex items-center justify-end gap-3">
+                    <button type="button" onClick={() => setEditingId(null)} className="text-xs text-brand-muted hover:text-navy transition-colors">
+                      戻す
+                    </button>
+                    <SubmitButton
+                      label="保存"
+                      pendingLabel="保存中..."
+                      className="px-4 py-2.5 rounded-lg bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors whitespace-nowrap disabled:opacity-50"
+                    />
+                  </div>
+                </form>
+              ) : (
                 <div key={inv.id} className="flex items-start justify-between gap-3 py-1.5">
                   <div className="min-w-0">
                     <p className="text-sm break-words">{inv.title}</p>
@@ -112,13 +130,22 @@ export default function InvestmentSection({
                         </button>
                       </form>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmingId(inv.id)}
-                        className="text-[10px] text-brand-muted/50 hover:text-red-500 transition-colors"
-                      >
-                        削除
-                      </button>
+                      <span className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setEditingId(inv.id); setConfirmingId(null); }}
+                          className="text-[10px] text-brand-muted/70 hover:text-navy transition-colors"
+                        >
+                          編集
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(inv.id)}
+                          className="text-[10px] text-brand-muted/50 hover:text-red-500 transition-colors"
+                        >
+                          削除
+                        </button>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -130,37 +157,7 @@ export default function InvestmentSection({
 
       {showForm ? (
         <form action={addAction} className="border-t border-brand-border/50 pt-4 mt-4 space-y-3">
-          <input name="title" required placeholder="例: Sony FE 50mm F1.4 GM" className="form-input" />
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-[10px] text-brand-muted mb-1">本体価格</p>
-              <MoneyInput name="amount" placeholder="例: 180,000" />
-            </div>
-            <div>
-              <p className="text-[10px] text-brand-muted mb-1">事業で使う割合（家事按分）</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  name="business_ratio"
-                  min={1}
-                  max={100}
-                  defaultValue={100}
-                  inputMode="numeric"
-                  className="form-input"
-                />
-                <span className="text-sm text-brand-muted">%</span>
-              </div>
-            </div>
-          </div>
-          <select name="category" defaultValue="機材" className="form-input" aria-label="分類">
-            {INVESTMENT_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <div className="grid grid-cols-2 gap-3">
-            <input type="date" name="purchased_at" className="form-input" aria-label="買った日" />
-            <input name="note" placeholder="メモ（例: 中古で購入）" className="form-input" />
-          </div>
+          <InvestmentFields />
           <div className="flex items-center justify-end gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="text-xs text-brand-muted hover:text-navy transition-colors">
               戻す
@@ -183,6 +180,45 @@ export default function InvestmentSection({
           </button>
         </div>
       )}
+    </>
+  );
+}
+
+/** 投資の入力欄（足すときと編集するときで共通） */
+function InvestmentFields({ inv }: { inv?: Investment }) {
+  return (
+    <>
+      <input name="title" required defaultValue={inv?.title} placeholder="例: Sony FE 50mm F1.4 GM" className="form-input" />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="text-[10px] text-brand-muted mb-1">本体価格</p>
+          <MoneyInput name="amount" defaultValue={inv?.amount} placeholder="例: 180,000" />
+        </div>
+        <div>
+          <p className="text-[10px] text-brand-muted mb-1">事業で使う割合（家事按分）</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              name="business_ratio"
+              min={1}
+              max={100}
+              defaultValue={inv?.business_ratio ?? 100}
+              inputMode="numeric"
+              className="form-input"
+            />
+            <span className="text-sm text-brand-muted">%</span>
+          </div>
+        </div>
+      </div>
+      <select name="category" defaultValue={inv?.category ?? '機材'} className="form-input" aria-label="分類">
+        {INVESTMENT_CATEGORIES.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+      <div className="grid grid-cols-2 gap-3">
+        <input type="date" name="purchased_at" defaultValue={inv?.purchased_at ?? ''} className="form-input" aria-label="買った日" />
+        <input name="note" defaultValue={inv?.note ?? ''} placeholder="メモ（例: 中古で購入）" className="form-input" />
+      </div>
     </>
   );
 }
