@@ -83,6 +83,21 @@ export interface CaseDeliverable {
   user_id: string;
 }
 
+export const INVESTMENT_CATEGORIES = ['機材', 'PC・ソフト', '学び', 'その他'] as const;
+export type InvestmentCategory = (typeof INVESTMENT_CATEGORIES)[number];
+
+/** 投資（機材・PCなど、案件にひもづかない長く使うもの） */
+export interface Investment {
+  id: string;
+  title: string;
+  amount: number;
+  category: InvestmentCategory;
+  purchased_at: string | null;
+  note: string | null;
+  created_at: string;
+  user_id: string;
+}
+
 export const ACTIVITY_CATEGORIES = [
   { value: 'sns', label: 'SNS' },
   { value: 'development', label: '開発' },

@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Case, CaseDeliverable, ProgressLog } from '@/lib/types';
+import { INVESTMENT_CATEGORIES, type Case, type CaseDeliverable, type Investment, type ProgressLog } from '@/lib/types';
 import Link from 'next/link';
 import TargetForm from '@/components/TargetForm';
+import InvestmentSection from '@/components/InvestmentSection';
 import { formatYen, formatHoursH } from '@/lib/formatting';
 import { HOURLY_RATE } from '@/lib/constants';
 import { requireOwner } from '@/lib/auth';
@@ -290,6 +291,49 @@ export default async function AnalyticsPage({
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   const monthPacePct = Math.round((now.getDate() / daysInMonth) * 100);
 
+  // --- 投資と回収（年度に関係なく、開業からの合計） ---
+  const { data: investmentData, error: investmentError } = await supabase
+    .from('investments')
+    .select('*')
+    .order('purchased_at', { ascending: false, nullsFirst: false });
+
+  const allInvestments = (investmentData || []) as Investment[];
+  const investmentTableMissing = !!investmentError;
+  const totalInvested = allInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+  // 回収した額 = 入金済み案件の粗利（売上 − 経費）の合計
+  const totalRecovered = allCases
+    .filter((c) => isCasePaid(c))
+    .reduce((sum, c) => sum + getCaseRevenue(c) - (c.expenses || 0), 0);
+
+  async function addInvestment(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    const title = String(formData.get('title') || '').trim();
+    const amount = Number(formData.get('amount'));
+    const rawCategory = String(formData.get('category') || '機材');
+    const category = (INVESTMENT_CATEGORIES as readonly string[]).includes(rawCategory) ? rawCategory : 'その他';
+    const purchasedAt = String(formData.get('purchased_at') || '') || null;
+    const note = String(formData.get('note') || '').trim() || null;
+
+    if (title && amount > 0) {
+      await supabase
+        .from('investments')
+        .insert({ title, amount, category, purchased_at: purchasedAt, note, user_id: user.id });
+    }
+    redirect(`/analytics?year=${selectedYear}`);
+  }
+
+  async function deleteInvestment(formData: FormData) {
+    'use server';
+    const supabase = await createClient();
+    const id = String(formData.get('id') || '');
+    if (id) await supabase.from('investments').delete().eq('id', id);
+    redirect(`/analytics?year=${selectedYear}`);
+  }
+
   // 目標設定アクション
   async function setTarget(formData: FormData) {
     'use server';
@@ -502,6 +546,19 @@ export default async function AnalyticsPage({
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* 投資と回収（開業からの合計） */}
+      <div className="bg-white rounded-lg border border-brand-border p-6 mb-6">
+        <SectionLabel label="投資と回収" />
+        <InvestmentSection
+          investments={allInvestments}
+          totalInvested={totalInvested}
+          totalRecovered={totalRecovered}
+          tableMissing={investmentTableMissing}
+          addAction={addInvestment}
+          deleteAction={deleteInvestment}
+        />
       </div>
 
       {/* お金（実効時給・交通費・カテゴリ別・おもい別時給） */}
