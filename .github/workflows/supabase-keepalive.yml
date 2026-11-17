@@ -1,0 +1,39 @@
+# Supabase（Hitoha と Hitoha Daily のデータ）が一時停止しないように、毎日 9:00 ごろ（日本時間）にアクセスする
+# 失敗したら GitHub から通知メールが届く。Actions タブの「Run workflow」で手動でも動かせる
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: keepalive() を呼ぶ
+        env:
+          SUPABASE_URL: https://varnkkrbeqzomvkfxcrw.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          for i in 1 2 3; do
+            if res=$(curl -fsS -m 30 -X POST "$SUPABASE_URL/rest/v1/rpc/keepalive" \
+                -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+                -H "Content-Type: application/json" -d '{}'); then
+              echo "ok: $res"; exit 0
+            fi
+            echo "retry $i"; sleep 60
+          done
+          echo "::error::Supabase に届きませんでした。ダッシュボードで止まっていないか確認してください"
+          exit 1
+
+      # 公開リポジトリでは、60日コミットがないと定期実行が自動で止まるので、毎回有効にし直す
+      - name: この定期実行を有効のままにする
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -fsS -X PUT -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/supabase-keepalive.yml/enable"
